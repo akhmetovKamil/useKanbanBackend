@@ -14,9 +14,9 @@ export class UsersSchema extends TimeStamps {
     @prop()
     patronymic?: string;
 
-    @prop({ required: true })
+    @prop({ default: [], required: true })
     projects: string[];
 
-    @prop({ required: true })
+    @prop({ default: 5, required: true })
     currentMood: number;
 }
