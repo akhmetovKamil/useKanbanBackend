@@ -32,6 +32,10 @@ export class AuthService {
         return this.getTokens(dto.email);
     }
 
+    async logout(email: string): Promise<void> {
+        await this.userService.updateRtHash(email, null);
+    }
+
     async getTokens(email: string): Promise<JwtTokens> {
         const tokens = await this.generateTokens(email);
         const rtHash = await this.hash(tokens.refresh_token);
