@@ -19,4 +19,7 @@ export class UsersSchema extends TimeStamps {
 
     @prop({ default: 5, required: true })
     currentMood: number;
+
+    @prop({ required: true })
+    hash: string;
 }
