@@ -13,6 +13,6 @@ export class AuthSigninDto {
 
     @IsString()
     @MinLength(8)
-    @MaxLength(12)
+    @MaxLength(14)
     password: string;
 }

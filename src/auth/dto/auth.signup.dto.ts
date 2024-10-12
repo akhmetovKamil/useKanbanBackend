@@ -14,7 +14,7 @@ export class AuthSignupDto {
 
     @IsString()
     @MinLength(3)
-    @MaxLength(8)
+    @MaxLength(10)
     name: string;
 
     @IsString()
@@ -25,11 +25,12 @@ export class AuthSignupDto {
 
     @IsString()
     @IsOptional()
+    @MinLength(3)
     @MaxLength(10)
     patronymic?: string;
 
     @IsString()
     @MinLength(8)
-    @MaxLength(12)
+    @MaxLength(14)
     password: string;
 }

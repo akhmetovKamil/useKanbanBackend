@@ -11,6 +11,7 @@ import { AuthSignupDto } from "./dto/auth.signup.dto";
 import { JwtTokens } from "./types/jwt.tokens.type";
 import { AuthSigninDto } from "./dto/auth.signin.dto";
 import { Errors } from "../common/exception.constants";
+import { createHash } from "crypto";
 
 @Injectable()
 export class AuthService {
@@ -23,7 +24,7 @@ export class AuthService {
     async signup({ password, ...dto }: AuthSignupDto): Promise<JwtTokens> {
         if (await this.userService.getUser(dto.email))
             throw new BadRequestException(Errors.ALREADY_REGISTERED);
-        const hash = await this.hash(password);
+        const hash = await this.simpleHash(password);
         await this.userService.createUser(dto.email, {
             ...dto,
             hash,
@@ -52,15 +53,31 @@ export class AuthService {
             throw new UnauthorizedException(Errors.RT_HASH_NOT_FOUND);
         console.log(`Stored rtHash: ${user.rtHash}`);
         console.log(`Provided rt: ${rt}`);
-        const rtMatches = await compare(rt, user.rtHash);
+        const rtMatches = await this.compareTokens(rt, user.rtHash);
         console.log(`rtMatches: ${rtMatches}`);
         if (!rtMatches) throw new UnauthorizedException(Errors.RT_HASH_INVALID);
         return await this.getTokens(email);
     }
 
+    async simpleHash(data: string): Promise<string> {
+        const salt = await genSalt(10);
+        return await hash(data, salt);
+    }
+
+    async hashToken(token: string): Promise<string> {
+        const sha256Hash = createHash("sha256").update(token).digest("hex");
+        const salt = await genSalt(10);
+        return await hash(sha256Hash, salt);
+    }
+
+    async compareTokens(token: string, hashedToken: string): Promise<boolean> {
+        const sha256Hash = createHash("sha256").update(token).digest("hex");
+        return await compare(sha256Hash, hashedToken);
+    }
+
     async getTokens(email: string): Promise<JwtTokens> {
         const tokens = await this.generateTokens(email);
-        const rtHash = await this.hash(tokens.refresh_token);
+        const rtHash = await this.hashToken(tokens.refresh_token);
         await this.userService.updateRtHash(email, rtHash);
         return tokens;
     }
@@ -93,10 +110,5 @@ export class AuthService {
             { email },
             { expiresIn, secret },
         );
-    }
-
-    async hash(data: string): Promise<string> {
-        const salt = await genSalt(10);
-        return await hash(data, salt);
     }
 }
