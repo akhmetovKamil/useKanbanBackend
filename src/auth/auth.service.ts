@@ -4,7 +4,7 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { bcrypt } from "bcrypt";
 import { AuthSignupDto } from "./dto/auth.signup.dto";
-import { JwtTokens } from "./jwt.tokens.type";
+import { JwtTokens } from "./types/jwt.tokens.type";
 
 @Injectable()
 export class AuthService {
@@ -38,12 +38,12 @@ export class AuthService {
         const [at, rt] = await Promise.all([
             this.generateToken(
                 email,
-                this.configService.get("AT_TIME"),
+                15 * 60,
                 this.configService.get("AT_SECRET"),
             ),
             this.generateToken(
                 email,
-                this.configService.get("RT_TIME"),
+                60 * 60 * 24 * 7,
                 this.configService.get("RT_SECRET"),
             ),
         ]);
