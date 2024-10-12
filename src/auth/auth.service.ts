@@ -5,6 +5,7 @@ import { ConfigService } from "@nestjs/config";
 import { bcrypt } from "bcrypt";
 import { AuthSignupDto } from "./dto/auth.signup.dto";
 import { JwtTokens } from "./types/jwt.tokens.type";
+import { AuthSigninDto } from "./dto/auth.signin.dto";
 
 @Injectable()
 export class AuthService {
@@ -14,13 +15,28 @@ export class AuthService {
         private readonly configService: ConfigService,
     ) {}
 
-    async signup(dto: AuthSignupDto): Promise<JwtTokens> {
-        const hash = await this.hash(dto.password);
+    async signup({ password, ...dto }: AuthSignupDto): Promise<JwtTokens> {
+        const hash = await this.hash(password);
         await this.userService.createUser(dto.email, {
             ...dto,
             hash,
         });
-        return await this.generateTokens(dto.email);
+        return this.getTokens(dto.email);
+    }
+
+    async signin(dto: AuthSigninDto): Promise<JwtTokens> {
+        const user = await this.userService.getUser(dto.email);
+        if (!user) throw new Error("User not found");
+        const isPasswordValid = await bcrypt.compare(dto.password, user.hash);
+        if (!isPasswordValid) throw new Error("Invalid password");
+        return this.getTokens(dto.email);
+    }
+
+    async getTokens(email: string): Promise<JwtTokens> {
+        const tokens = await this.generateTokens(email);
+        const rtHash = await this.hash(tokens.refresh_token);
+        await this.userService.updateRtHash(email, rtHash);
+        return tokens;
     }
 
     async generateToken(
