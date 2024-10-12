@@ -1,4 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import {
+    BadRequestException,
+    Injectable,
+    UnauthorizedException,
+} from "@nestjs/common";
 import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
@@ -6,6 +10,7 @@ import { bcrypt } from "bcrypt";
 import { AuthSignupDto } from "./dto/auth.signup.dto";
 import { JwtTokens } from "./types/jwt.tokens.type";
 import { AuthSigninDto } from "./dto/auth.signin.dto";
+import { Errors } from "../common/exception.constants";
 
 @Injectable()
 export class AuthService {
@@ -16,6 +21,8 @@ export class AuthService {
     ) {}
 
     async signup({ password, ...dto }: AuthSignupDto): Promise<JwtTokens> {
+        if (await this.userService.getUser(dto.email))
+            throw new BadRequestException(Errors.ALREADY_REGISTERED);
         const hash = await this.hash(password);
         await this.userService.createUser(dto.email, {
             ...dto,
@@ -26,9 +33,10 @@ export class AuthService {
 
     async signin(dto: AuthSigninDto): Promise<JwtTokens> {
         const user = await this.userService.getUser(dto.email);
-        if (!user) throw new Error("User not found");
+        if (!user) throw new BadRequestException(Errors.USER_NOT_FOUND);
         const isPasswordValid = await bcrypt.compare(dto.password, user.hash);
-        if (!isPasswordValid) throw new Error("Invalid password");
+        if (!isPasswordValid)
+            throw new BadRequestException(Errors.USER_NOT_FOUND);
         return this.getTokens(dto.email);
     }
 
@@ -36,22 +44,21 @@ export class AuthService {
         await this.userService.updateRtHash(email, null);
     }
 
+    async refresh(email: string, rt: string): Promise<JwtTokens> {
+        const user = await this.userService.getUser(email);
+        if (!user) throw new BadRequestException(Errors.USER_NOT_FOUND);
+        if (!user.rtHash)
+            throw new UnauthorizedException(Errors.RT_HASH_NOT_FOUND);
+        const rtMatches = await bcrypt.compare(rt, user.rtHash);
+        if (!rtMatches) throw new UnauthorizedException(Errors.RT_HASH_INVALID);
+        return await this.getTokens(email);
+    }
+
     async getTokens(email: string): Promise<JwtTokens> {
         const tokens = await this.generateTokens(email);
         const rtHash = await this.hash(tokens.refresh_token);
         await this.userService.updateRtHash(email, rtHash);
         return tokens;
-    }
-
-    async generateToken(
-        email: string,
-        expiresIn: number,
-        secret: string,
-    ): Promise<string> {
-        return await this.jwtService.signAsync(
-            { email },
-            { expiresIn, secret },
-        );
     }
 
     async generateTokens(email: string): Promise<JwtTokens> {
@@ -71,6 +78,17 @@ export class AuthService {
             access_token: at,
             refresh_token: rt,
         };
+    }
+
+    async generateToken(
+        email: string,
+        expiresIn: number,
+        secret: string,
+    ): Promise<string> {
+        return await this.jwtService.signAsync(
+            { email },
+            { expiresIn, secret },
+        );
     }
 
     async hash(data: string): Promise<string> {
