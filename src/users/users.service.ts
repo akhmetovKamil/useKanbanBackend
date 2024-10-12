@@ -17,10 +17,15 @@ export class UsersService {
             name: dto.name,
             surname: dto.surname,
             patronymic: dto.patronymic,
+            hash: dto.hash,
         }).save();
     }
 
     async getUser(email: string) {
-        return this.usersSchema.findOne({ email: email });
+        return this.usersSchema.findOne({ email });
+    }
+
+    async updateRtHash(email: string, hash: string) {
+        await this.usersSchema.findOneAndUpdate({ email }, { rtHash: hash });
     }
 }
