@@ -6,7 +6,7 @@ import {
 import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
-import { bcrypt } from "bcrypt";
+import { genSalt, hash, compare } from "bcryptjs";
 import { AuthSignupDto } from "./dto/auth.signup.dto";
 import { JwtTokens } from "./types/jwt.tokens.type";
 import { AuthSigninDto } from "./dto/auth.signin.dto";
@@ -34,7 +34,7 @@ export class AuthService {
     async signin(dto: AuthSigninDto): Promise<JwtTokens> {
         const user = await this.userService.getUser(dto.email);
         if (!user) throw new BadRequestException(Errors.USER_NOT_FOUND);
-        const isPasswordValid = await bcrypt.compare(dto.password, user.hash);
+        const isPasswordValid = await compare(dto.password, user.hash);
         if (!isPasswordValid)
             throw new BadRequestException(Errors.USER_NOT_FOUND);
         return this.getTokens(dto.email);
@@ -42,6 +42,7 @@ export class AuthService {
 
     async logout(email: string): Promise<void> {
         await this.userService.updateRtHash(email, null);
+        console.log(`Logout: rtHash for ${email} set to null`);
     }
 
     async refresh(email: string, rt: string): Promise<JwtTokens> {
@@ -49,7 +50,10 @@ export class AuthService {
         if (!user) throw new BadRequestException(Errors.USER_NOT_FOUND);
         if (!user.rtHash)
             throw new UnauthorizedException(Errors.RT_HASH_NOT_FOUND);
-        const rtMatches = await bcrypt.compare(rt, user.rtHash);
+        console.log(`Stored rtHash: ${user.rtHash}`);
+        console.log(`Provided rt: ${rt}`);
+        const rtMatches = await compare(rt, user.rtHash);
+        console.log(`rtMatches: ${rtMatches}`);
         if (!rtMatches) throw new UnauthorizedException(Errors.RT_HASH_INVALID);
         return await this.getTokens(email);
     }
@@ -92,7 +96,7 @@ export class AuthService {
     }
 
     async hash(data: string): Promise<string> {
-        const salt = await bcrypt.genSalt(10);
-        return await bcrypt.hash(data, salt);
+        const salt = await genSalt(10);
+        return await hash(data, salt);
     }
 }

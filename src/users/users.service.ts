@@ -18,7 +18,6 @@ export class UsersService {
             surname: dto.surname,
             patronymic: dto.patronymic,
             hash: dto.hash,
-            rtHash: dto.rtHash,
         }).save();
     }
 
