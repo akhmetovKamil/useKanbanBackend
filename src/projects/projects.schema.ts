@@ -10,7 +10,10 @@ export class ProjectsSchema extends TimeStamps {
     @prop({ required: true, type: () => Info, _id: false })
     info: Info;
 
-    @prop({ type: () => UsersData, _id: false })
+    @prop({ type: () => [String], default: [] })
+    positions: string[];
+
+    @prop({ required: true, type: () => UsersData, _id: false })
     usersData: Map<Types.ObjectId, UsersData>;
 }
 
