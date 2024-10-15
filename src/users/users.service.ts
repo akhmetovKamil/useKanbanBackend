@@ -3,6 +3,7 @@ import { InjectModel } from "nestjs-typegoose";
 import { UsersSchema } from "./users.schema";
 import { ReturnModelType } from "@typegoose/typegoose";
 import { UsersCreateDto } from "./dto/users.create.dto";
+import { Types } from "mongoose";
 
 @Injectable()
 export class UsersService {
@@ -25,7 +26,19 @@ export class UsersService {
         return this.usersSchema.findOne({ email });
     }
 
-    async updateRtHash(email: string, hash: string) {
+    async getUserId(email: string): Promise<Types.ObjectId> {
+        const user = await this.usersSchema.findOne({ email }).exec();
+        return user ? user._id : null;
+    }
+
+    async updateRtHash(email: string, hash: string): Promise<void> {
         await this.usersSchema.findOneAndUpdate({ email }, { rtHash: hash });
+    }
+
+    async addProject(email: string, projectId: Types.ObjectId): Promise<void> {
+        await this.usersSchema.findOneAndUpdate(
+            { email },
+            { $addToSet: { projects: projectId } },
+        );
     }
 }

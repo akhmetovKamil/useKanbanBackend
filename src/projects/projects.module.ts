@@ -3,6 +3,7 @@ import { ProjectsService } from "./projects.service";
 import { ProjectsController } from "./projects.controller";
 import { TypegooseModule } from "nestjs-typegoose";
 import { ProjectsSchema } from "./projects.schema";
+import { UsersService } from "../users/users.service";
 
 @Module({
     imports: [
@@ -14,6 +15,7 @@ import { ProjectsSchema } from "./projects.schema";
                 },
             },
         ]),
+        UsersService,
     ],
     providers: [ProjectsService],
     controllers: [ProjectsController],

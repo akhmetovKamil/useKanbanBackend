@@ -13,8 +13,8 @@ export class ProjectsSchema extends TimeStamps {
     @prop({ type: () => [String], default: [] })
     positions: string[];
 
-    @prop({ required: true, type: () => UsersData, _id: false })
-    usersData: Map<Types.ObjectId, UsersData>;
+    @prop({ required: true, type: () => Team, _id: false })
+    team: Map<Types.ObjectId, Team>;
 }
 
 class Info {
@@ -25,7 +25,7 @@ class Info {
     description: string;
 }
 
-class UsersData {
+class Team {
     @prop({ required: true, type: () => String })
     position: string;
 
