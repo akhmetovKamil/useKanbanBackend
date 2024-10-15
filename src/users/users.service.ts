@@ -31,6 +31,13 @@ export class UsersService {
         return user ? user._id : null;
     }
 
+    async getProjectsPopulated(email: string) {
+        return this.usersSchema
+            .findOne({ email })
+            .populate("projects")
+            .execPopulate();
+    }
+
     async updateRtHash(email: string, hash: string): Promise<void> {
         await this.usersSchema.findOneAndUpdate({ email }, { rtHash: hash });
     }
