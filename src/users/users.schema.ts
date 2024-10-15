@@ -1,5 +1,6 @@
 import { TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
-import { prop } from "@typegoose/typegoose";
+import { prop, Ref } from "@typegoose/typegoose";
+import { ProjectsSchema } from "../projects/projects.schema";
 
 export class UsersSchema extends TimeStamps {
     @prop({ unique: true, required: true, type: () => String })
@@ -14,8 +15,8 @@ export class UsersSchema extends TimeStamps {
     @prop({ type: () => String })
     patronymic?: string;
 
-    @prop({ default: [], required: true })
-    projects: string[];
+    @prop({ type: () => ProjectsSchema, default: [], required: true })
+    projects: Ref<ProjectsSchema>[];
 
     @prop({ default: 5, required: true })
     currentMood: number;
