@@ -13,20 +13,20 @@ export class AuthSignupDto {
     email: string;
 
     @IsString()
-    @MinLength(3)
-    @MaxLength(10)
+    @MinLength(2)
+    @MaxLength(15)
     name: string;
 
     @IsString()
     @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(10)
+    @MinLength(2)
+    @MaxLength(15)
     surname: string;
 
     @IsString()
     @IsOptional()
-    @MinLength(3)
-    @MaxLength(10)
+    @MinLength(2)
+    @MaxLength(15)
     patronymic?: string;
 
     @IsString()
