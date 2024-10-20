@@ -4,4 +4,5 @@ export enum UserRole {
     USER = "user",
     VIEWER = "viewer",
     DISABLED = "disabled",
+    INVITED = "invited",
 }

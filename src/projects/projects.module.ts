@@ -4,6 +4,7 @@ import { ProjectsController } from "./projects.controller";
 import { TypegooseModule } from "nestjs-typegoose";
 import { ProjectsSchema } from "./projects.schema";
 import { UsersService } from "../users/users.service";
+import { InvitationsModule } from './invitations/invitations.module';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { UsersService } from "../users/users.service";
             },
         ]),
         UsersService,
+        InvitationsModule,
     ],
     providers: [ProjectsService],
     controllers: [ProjectsController],

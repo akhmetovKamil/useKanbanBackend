@@ -66,10 +66,6 @@ export class ProjectsService {
         await this.projectsSchema.findByIdAndDelete(id).exec();
     }
 
-    async inviteUser() {}
-
-    async acceptInvitation() {}
-
     async changeUserData(projectId: Types.ObjectId, team: TeamChangeDto) {
         const userId = this.usersService.getUserId(team.email);
         await this.projectsSchema.findByIdAndUpdate(
