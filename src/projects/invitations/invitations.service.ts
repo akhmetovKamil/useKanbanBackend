@@ -4,10 +4,18 @@ import { ProjectsService } from "../projects.service";
 import * as crypto from "crypto";
 import { UserRole } from "../../common/types/roles.types";
 import { AcceptInvitationLinkDto } from "./dto/accept.invitation_link.dto";
+import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import { UsersService } from "../../users/users.service";
 
 @Injectable()
 export class InvitationsService {
-    constructor(private readonly projectsService: ProjectsService) {}
+    constructor(
+        private readonly projectsService: ProjectsService,
+        private readonly usersService: UsersService,
+        private readonly jwtService: JwtService,
+        private readonly configService: ConfigService,
+    ) {}
 
     async generateInvitationToken(
         id: Types.ObjectId,
@@ -20,12 +28,9 @@ export class InvitationsService {
         return `https:/.../invite/${token}`;
     }
 
+    // TODO extract dto
     async deleteInvitationToken(id: Types.ObjectId, name: string) {
         await this.projectsService.deleteInvitationHash(id, name);
-    }
-
-    hashToken(token: string): string {
-        return crypto.createHash("sha256").update(token).digest("hex");
     }
 
     async acceptLink(projectId: Types.ObjectId, dto: AcceptInvitationLinkDto) {
@@ -43,11 +48,37 @@ export class InvitationsService {
         return "Success";
     }
 
-    async acceptInvitation() {
-        // TODO set role to Roles.Invited
+    async sendInvitationEmail(
+        projectId: Types.ObjectId,
+        email: string,
+        role: string,
+    ) {
+        const token = await this.generateEmailToken(email, role);
+        const id = await this.usersService.getUserId(email);
+        await this.projectsService.changeUserData(projectId, {
+            position: "random", // TODO implement default position
+            userId: id,
+            role: UserRole.INVITED,
+        });
+        console.log(token);
+        //TODO use email service to send message
     }
 
-    async sendInvitationEmail() {
-        // TODO set role to Roles.Invited
+    async acceptInvitation() {
+        // TODO set role to Roles.Needed
+    }
+
+    async generateEmailToken(email: string, role: string) {
+        return await this.jwtService.signAsync(
+            { email, role },
+            {
+                expiresIn: 30 * 60,
+                secret: this.configService.get("INVITATION_SECRET"),
+            },
+        );
+    }
+
+    hashToken(token: string): string {
+        return crypto.createHash("sha256").update(token).digest("hex");
     }
 }
