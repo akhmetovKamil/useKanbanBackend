@@ -4,9 +4,15 @@ import { InvitationsController } from "./invitations.controller";
 import { ProjectsService } from "../projects.service";
 import { ConfigModule } from "@nestjs/config";
 import { UsersService } from "../../users/users.service";
+import { JwtModule } from "@nestjs/jwt";
 
 @Module({
-    imports: [ProjectsService, ConfigModule, UsersService],
+    imports: [
+        ProjectsService,
+        ConfigModule,
+        UsersService,
+        JwtModule.register({}),
+    ],
     providers: [InvitationsService],
     controllers: [InvitationsController],
 })

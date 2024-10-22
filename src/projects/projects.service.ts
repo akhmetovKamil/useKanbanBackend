@@ -68,7 +68,13 @@ export class ProjectsService {
         await this.projectsSchema.findByIdAndDelete(id).exec();
     }
 
+    async getProjectName(id: Types.ObjectId): Promise<string> {
+        const project = await this.projectsSchema.findById(id).exec();
+        return project.name;
+    }
+
     // TODO is should be email or id
+    // TODO add projectId to user here
     async changeUserData(
         projectId: Types.ObjectId,
         team: ChangeProjectTeamDto,

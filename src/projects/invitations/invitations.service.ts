@@ -7,6 +7,7 @@ import { AcceptInvitationLinkDto } from "./dto/accept.invitation_link.dto";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { UsersService } from "../../users/users.service";
+import { MailerService } from "@nestjs-modules/mailer";
 
 @Injectable()
 export class InvitationsService {
@@ -15,6 +16,7 @@ export class InvitationsService {
         private readonly usersService: UsersService,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
+        private readonly mailerService: MailerService,
     ) {}
 
     async generateInvitationToken(
@@ -51,7 +53,7 @@ export class InvitationsService {
     async sendInvitationEmail(
         projectId: Types.ObjectId,
         email: string,
-        role: string,
+        role: UserRole,
     ) {
         const token = await this.generateEmailToken(email, role);
         const id = await this.usersService.getUserId(email);
@@ -61,14 +63,32 @@ export class InvitationsService {
             role: UserRole.INVITED,
         });
         console.log(token);
-        //TODO use email service to send message
+        // TODO is there are invitation accept page or accept only on backend route
+        const url = `https://.../accept-invite-email?token=${token}`;
+        const name = await this.projectsService.getProjectName(projectId);
+        await this.mailerService.sendMail({
+            to: email,
+            subject: "Приглашение в проект",
+            template: "./invite",
+            context: { url, name },
+        });
     }
 
-    async acceptInvitation() {
+    async acceptInvitation(
+        projectId: Types.ObjectId,
+        email: string,
+        role: UserRole,
+    ) {
         // TODO set role to Roles.Needed
+        const id = await this.usersService.getUserId(email);
+        await this.projectsService.changeUserData(projectId, {
+            position: "random", // TODO implement default position
+            userId: id,
+            role,
+        });
     }
 
-    async generateEmailToken(email: string, role: string) {
+    async generateEmailToken(email: string, role: UserRole) {
         return await this.jwtService.signAsync(
             { email, role },
             {
