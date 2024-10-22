@@ -1,10 +1,10 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { ProjectsService } from "./projects.service";
 import { ProjectsController } from "./projects.controller";
 import { TypegooseModule } from "nestjs-typegoose";
 import { ProjectsSchema } from "./projects.schema";
-import { UsersService } from "../users/users.service";
 import { InvitationsModule } from "./invitations/invitations.module";
+import { UsersModule } from "../users/users.module";
 
 @Module({
     imports: [
@@ -16,8 +16,8 @@ import { InvitationsModule } from "./invitations/invitations.module";
                 },
             },
         ]),
-        UsersService,
-        InvitationsModule,
+        UsersModule,
+        forwardRef(() => InvitationsModule),
     ],
     providers: [ProjectsService],
     controllers: [ProjectsController],

@@ -1,19 +1,20 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { InvitationsService } from "./invitations.service";
 import { InvitationsController } from "./invitations.controller";
-import { ProjectsService } from "../projects.service";
 import { ConfigModule } from "@nestjs/config";
-import { UsersService } from "../../users/users.service";
 import { JwtModule } from "@nestjs/jwt";
+import { InvitationStrategy } from "./strategies/invitation.strategy";
+import { UsersModule } from "../../users/users.module";
+import { ProjectsModule } from "../projects.module";
 
 @Module({
     imports: [
-        ProjectsService,
+        forwardRef(() => ProjectsModule),
         ConfigModule,
-        UsersService,
+        UsersModule,
         JwtModule.register({}),
     ],
-    providers: [InvitationsService],
+    providers: [InvitationsService, InvitationStrategy],
     controllers: [InvitationsController],
 })
 export class InvitationsModule {}
