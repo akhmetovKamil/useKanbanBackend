@@ -1,15 +1,15 @@
-import { IsEmail, IsEnum, IsNotEmpty } from "class-validator";
+import { IsEnum, IsMongoId, IsNotEmpty, IsString } from "class-validator";
 import { UserRole } from "../../common/types/roles.types";
-import { IsValidPosition } from "../../common/decorators/is_valid_position.decorator";
+import { Types } from "mongoose";
 
 export class TeamChangeDto {
-    @IsValidPosition({ message: "Invalid position" })
+    @IsString()
+    @IsNotEmpty()
     position: string;
 
     @IsEnum(UserRole)
     role: UserRole;
 
-    @IsEmail()
-    @IsNotEmpty()
-    email: string;
+    @IsMongoId()
+    userId: Types.ObjectId;
 }

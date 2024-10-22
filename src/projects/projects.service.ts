@@ -34,7 +34,9 @@ export class ProjectsService {
     }
 
     async getProject(id: Types.ObjectId): Promise<ProjectsSchema> {
-        return this.projectsSchema.findById(id).exec();
+        const project = this.projectsSchema.findById(id).exec();
+        if (!project) throw new Error("нет проекта"); // TODO wrong error throwing
+        return project;
     }
 
     async getProjects(email: string): Promise<ProjectsSchema[]> {
@@ -66,11 +68,11 @@ export class ProjectsService {
         await this.projectsSchema.findByIdAndDelete(id).exec();
     }
 
+    // TODO is should be email or id
     async changeUserData(projectId: Types.ObjectId, team: TeamChangeDto) {
-        const userId = this.usersService.getUserId(team.email);
         await this.projectsSchema.findByIdAndUpdate(
             projectId,
-            { $set: { [`usersData.${userId}`]: team } },
+            { $set: { [`usersData.${team.userId}`]: team } },
             { new: true, useFindAndModify: false },
         );
     }
@@ -82,5 +84,21 @@ export class ProjectsService {
             { $unset: { [`usersData.${userId}`]: "" } },
             { new: true, useFindAndModify: false },
         );
+    }
+
+    async setInvitationHash(
+        projectId: Types.ObjectId,
+        hash: string,
+        name: string,
+    ) {
+        await this.projectsSchema.findByIdAndUpdate(projectId, {
+            $set: { [`invitationHashes.${name}`]: hash },
+        });
+    }
+
+    async deleteInvitationHash(projectId: Types.ObjectId, name: string) {
+        await this.projectsSchema.findByIdAndUpdate(projectId, {
+            $unset: { [`invitationHashes.${name}`]: "" },
+        });
     }
 }

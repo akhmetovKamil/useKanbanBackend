@@ -1,5 +1,5 @@
 import { TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
-import { prop } from "@typegoose/typegoose";
+import { prop, PropType } from "@typegoose/typegoose";
 import { Types } from "mongoose";
 import { UserRole } from "../common/types/roles.types";
 
@@ -15,6 +15,9 @@ export class ProjectsSchema extends TimeStamps {
 
     @prop({ required: true, type: () => Team, _id: false })
     team: Map<Types.ObjectId, Team>;
+
+    @prop({ type: () => String }, PropType.MAP)
+    invitationHashes: Map<string, string>;
 }
 
 class Info {
