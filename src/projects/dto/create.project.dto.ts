@@ -7,7 +7,7 @@ import {
 } from "class-validator";
 import { Type } from "class-transformer";
 
-export class ProjectsCreateDto {
+export class CreateProjectDto {
     @IsString()
     @IsNotEmpty()
     name: string;

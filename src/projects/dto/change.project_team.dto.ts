@@ -2,7 +2,7 @@ import { IsEnum, IsMongoId, IsNotEmpty, IsString } from "class-validator";
 import { UserRole } from "../../common/types/roles.types";
 import { Types } from "mongoose";
 
-export class TeamChangeDto {
+export class ChangeProjectTeamDto {
     @IsString()
     @IsNotEmpty()
     position: string;

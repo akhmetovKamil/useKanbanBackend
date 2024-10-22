@@ -7,9 +7,9 @@ import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { genSalt, hash, compare } from "bcryptjs";
-import { AuthSignupDto } from "./dto/auth.signup.dto";
+import { SignupAuthDto } from "./dto/signup.auth.dto";
 import { JwtTokens } from "./types/jwt.tokens.type";
-import { AuthSigninDto } from "./dto/auth.signin.dto";
+import { SigninAuthDto } from "./dto/signin.auth.dto";
 import { Errors } from "../common/exception.constants";
 import { createHash } from "crypto";
 
@@ -21,7 +21,7 @@ export class AuthService {
         private readonly configService: ConfigService,
     ) {}
 
-    async signup({ password, ...dto }: AuthSignupDto): Promise<JwtTokens> {
+    async signup({ password, ...dto }: SignupAuthDto): Promise<JwtTokens> {
         if (await this.userService.getUser(dto.email))
             throw new BadRequestException(Errors.ALREADY_REGISTERED);
         const hash = await this.simpleHash(password);
@@ -32,7 +32,7 @@ export class AuthService {
         return this.getTokens(dto.email);
     }
 
-    async signin(dto: AuthSigninDto): Promise<JwtTokens> {
+    async signin(dto: SigninAuthDto): Promise<JwtTokens> {
         const user = await this.userService.getUser(dto.email);
         if (!user) throw new BadRequestException(Errors.USER_NOT_FOUND);
         const isPasswordValid = await compare(dto.password, user.hash);

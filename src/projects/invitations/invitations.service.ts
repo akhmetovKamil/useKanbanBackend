@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import { ProjectsService } from "../projects.service";
 import * as crypto from "crypto";
 import { UserRole } from "../../common/types/roles.types";
+import { AcceptInvitationLinkDto } from "./dto/accept.invitation_link.dto";
 
 @Injectable()
 export class InvitationsService {
@@ -27,12 +28,8 @@ export class InvitationsService {
         return crypto.createHash("sha256").update(token).digest("hex");
     }
 
-    async acceptLink(
-        projectId: Types.ObjectId,
-        id: Types.ObjectId,
-        token: string,
-    ) {
-        const hashedToken = this.hashToken(token);
+    async acceptLink(projectId: Types.ObjectId, dto: AcceptInvitationLinkDto) {
+        const hashedToken = this.hashToken(dto.token);
         console.log(hashedToken);
         const project = await this.projectsService.getProject(projectId);
         const isValid = project.invitationHashes.has(hashedToken);
@@ -40,7 +37,7 @@ export class InvitationsService {
         await this.projectsService.changeUserData(projectId, {
             position: "viewer", // TODO implement default position
             role: UserRole.VIEWER,
-            userId: id,
+            userId: dto.id,
         });
         // TODO add redirect to the project page in controller
         return "Success";

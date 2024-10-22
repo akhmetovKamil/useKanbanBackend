@@ -6,7 +6,7 @@ import {
     MinLength,
 } from "class-validator";
 
-export class AuthSigninDto {
+export class SigninAuthDto {
     @IsEmail()
     @IsNotEmpty()
     email: string;

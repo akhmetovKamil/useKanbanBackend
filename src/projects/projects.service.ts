@@ -2,13 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "nestjs-typegoose";
 import { ReturnModelType } from "@typegoose/typegoose";
 import { ProjectsSchema } from "./projects.schema";
-import { ProjectsCreateDto } from "./dto/projects.create.dto";
+import { CreateProjectDto } from "./dto/create.project.dto";
 import { UsersService } from "../users/users.service";
 import { Types } from "mongoose";
-import { TeamChangeDto } from "./dto/team.change.dto";
+import { ChangeProjectTeamDto } from "./dto/change.project_team.dto";
 import { UserRole } from "../common/types/roles.types";
-import { ProjectsUpdateInfoDto } from "./dto/projects.update_info.dto";
-import { ProjectsUpdateNameDto } from "./dto/projects.updata_name.dto";
+import { UpdateProjectInfoDto } from "./dto/update.project_info.dto";
+import { UpdateProjectNameDto } from "./dto/update.project_name.dto";
 
 @Injectable()
 export class ProjectsService {
@@ -20,7 +20,7 @@ export class ProjectsService {
 
     async createProject(
         email: string,
-        dto: ProjectsCreateDto,
+        dto: CreateProjectDto,
     ): Promise<ProjectsSchema> {
         const userId = await this.usersService.getUserId(email);
         const team = new Map();
@@ -44,7 +44,7 @@ export class ProjectsService {
         return user.projects;
     }
 
-    async updateProjectInfo(id: Types.ObjectId, dto: ProjectsUpdateInfoDto) {
+    async updateProjectInfo(id: Types.ObjectId, dto: UpdateProjectInfoDto) {
         await this.projectsSchema
             .findByIdAndUpdate(
                 id,
@@ -54,7 +54,7 @@ export class ProjectsService {
             .exec();
     }
 
-    async updateProjectName(id: Types.ObjectId, dto: ProjectsUpdateNameDto) {
+    async updateProjectName(id: Types.ObjectId, dto: UpdateProjectNameDto) {
         await this.projectsSchema
             .findByIdAndUpdate(
                 id,
@@ -69,7 +69,10 @@ export class ProjectsService {
     }
 
     // TODO is should be email or id
-    async changeUserData(projectId: Types.ObjectId, team: TeamChangeDto) {
+    async changeUserData(
+        projectId: Types.ObjectId,
+        team: ChangeProjectTeamDto,
+    ) {
         await this.projectsSchema.findByIdAndUpdate(
             projectId,
             { $set: { [`usersData.${team.userId}`]: team } },

@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "nestjs-typegoose";
 import { UsersSchema } from "./users.schema";
 import { ReturnModelType } from "@typegoose/typegoose";
-import { UsersCreateDto } from "./dto/users.create.dto";
+import { CreateUserDto } from "./dto/create.user.dto";
 import { Types } from "mongoose";
 
 @Injectable()
@@ -12,7 +12,7 @@ export class UsersService {
         private readonly usersSchema: ReturnModelType<typeof UsersSchema>,
     ) {}
 
-    async createUser(email: string, dto: UsersCreateDto) {
+    async createUser(email: string, dto: CreateUserDto) {
         return await new this.usersSchema({
             email: email,
             name: dto.name,
