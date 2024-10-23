@@ -1,5 +1,5 @@
 import { TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
-import { prop, PropType } from "@typegoose/typegoose";
+import { pre, prop, PropType } from "@typegoose/typegoose";
 import { Types } from "mongoose";
 import { UserRole } from "../common/types/roles.types";
 
@@ -19,15 +19,20 @@ class Team {
     role: UserRole;
 }
 
+@pre<ProjectsSchema>("save", function (next) {
+    this.team.forEach((value) => {
+        if (!value.position) {
+            value.position = "default_position";
+        }
+    });
+    next();
+})
 export class ProjectsSchema extends TimeStamps {
     @prop({ required: true, type: () => String })
     name: string;
 
     @prop({ required: true, type: () => Info, _id: false })
     info: Info;
-
-    @prop({ type: () => [String], default: [] })
-    positions: string[];
 
     @prop({ required: true, type: () => Team, _id: false })
     team: Map<Types.ObjectId, Team>;

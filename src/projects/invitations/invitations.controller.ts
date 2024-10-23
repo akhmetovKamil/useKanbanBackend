@@ -24,6 +24,7 @@ export class InvitationsController {
             projectId,
             "alicesun65@gmail.com",
             UserRole.ADMIN,
+            "default position",
         );
     }
 }

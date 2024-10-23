@@ -10,6 +10,7 @@ import { UsersService } from "../../users/users.service";
 import { MailerService } from "@nestjs-modules/mailer";
 import { Errors } from "../../common/exception.constants";
 import { ManageInvitationLinkDto } from "./dto/manage.invitation_link.dto";
+import { ManageInvitationEmailDto } from "./dto/manage.invitation_email.dto";
 
 @Injectable()
 export class InvitationsService {
@@ -41,12 +42,11 @@ export class InvitationsService {
 
     async acceptLink(projectId: Types.ObjectId, dto: AcceptInvitationLinkDto) {
         const hashedToken = this.hashToken(dto.token);
-        console.log(hashedToken);
         const project = await this.projectsService.getProject(projectId);
         const isValid = project.invitationHashes.has(hashedToken);
         if (!isValid) throw new NotFoundException(Errors.LINK_INCORRECT);
         await this.projectsService.changeUserData(projectId, {
-            position: "viewer", // TODO implement default position
+            position: "viewer",
             role: UserRole.VIEWER,
             userId: dto.id,
         });
@@ -56,46 +56,47 @@ export class InvitationsService {
 
     async sendInvitationEmail(
         projectId: Types.ObjectId,
-        email: string,
-        role: UserRole,
+        dto: ManageInvitationEmailDto,
     ) {
-        const token = await this.generateEmailToken(email, role);
-        const id = await this.usersService.getUserId(email);
+        const token = await this.generateEmailToken(
+            dto.email,
+            dto.role,
+            dto.position,
+        );
+        const userId = await this.usersService.getUserId(dto.email);
         await this.projectsService.changeUserData(projectId, {
-            position: "random", // TODO implement default position
-            userId: id,
+            position: dto.position,
+            userId,
             role: UserRole.INVITED,
         });
-        console.log(token);
         // TODO is there are invitation accept page or accept only on backend route
         const url = `https://.../accept-invite-email?token=${token}`;
         const name = await this.projectsService.getProjectName(projectId);
         await this.mailerService.sendMail({
-            to: email,
+            to: dto.email,
             subject: "Приглашение в проект",
             template: "invite",
-            context: { url, projectName: name },
+            context: { url, projectName: name, role: dto.role },
         });
-        console.log("success");
         // TODO отправляется 3000мс, надо чтобы не блокировались остальные функции на фронте
     }
 
     async acceptInvitation(
         projectId: Types.ObjectId,
-        email: string,
-        role: UserRole,
+        dto: ManageInvitationEmailDto,
     ) {
-        const id = await this.usersService.getUserId(email);
+        const userId = await this.usersService.getUserId(dto.email);
         await this.projectsService.changeUserData(projectId, {
-            position: "random", // TODO implement default position
-            userId: id,
-            role,
+            position: dto.position,
+            userId,
+            role: dto.role,
         });
+        // TODO Redirect to project page
     }
 
-    async generateEmailToken(email: string, role: UserRole) {
+    async generateEmailToken(email: string, role: UserRole, position?: string) {
         return await this.jwtService.signAsync(
-            { email, role },
+            { email, role, position },
             {
                 expiresIn: 30 * 60,
                 secret: this.configService.get("INVITATION_SECRET"),

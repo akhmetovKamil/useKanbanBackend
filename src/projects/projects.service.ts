@@ -26,7 +26,7 @@ export class ProjectsService {
         const userId = await this.usersService.getUserId(email);
         const team = new Map();
         team.set(userId, {
-            position: "default", // TODO default position
+            position: dto.position,
             role: UserRole.OWNER,
         });
         const newProject = new this.projectsSchema({ ...dto, team });

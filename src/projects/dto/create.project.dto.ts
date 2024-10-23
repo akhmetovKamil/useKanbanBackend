@@ -1,7 +1,6 @@
 import {
-    ArrayNotEmpty,
-    IsArray,
     IsNotEmpty,
+    IsOptional,
     IsString,
     ValidateNested,
 } from "class-validator";
@@ -26,8 +25,7 @@ export class CreateProjectDto {
     @Type(() => Info)
     info: Info;
 
-    @IsArray()
-    @ArrayNotEmpty()
-    @IsString({ each: true })
-    positions: string[];
+    @IsString()
+    @IsOptional()
+    position: string;
 }

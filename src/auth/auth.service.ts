@@ -43,7 +43,6 @@ export class AuthService {
 
     async logout(email: string): Promise<void> {
         await this.userService.updateRtHash(email, null);
-        console.log(`Logout: rtHash for ${email} set to null`);
     }
 
     async refresh(email: string, rt: string): Promise<JwtTokens> {
@@ -51,10 +50,7 @@ export class AuthService {
         if (!user) throw new BadRequestException(Errors.USER_NOT_FOUND);
         if (!user.rtHash)
             throw new UnauthorizedException(Errors.RT_HASH_NOT_FOUND);
-        console.log(`Stored rtHash: ${user.rtHash}`);
-        console.log(`Provided rt: ${rt}`);
         const rtMatches = await this.compareTokens(rt, user.rtHash);
-        console.log(`rtMatches: ${rtMatches}`);
         if (!rtMatches) throw new UnauthorizedException(Errors.RT_HASH_INVALID);
         return await this.getTokens(email);
     }
