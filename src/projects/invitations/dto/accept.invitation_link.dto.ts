@@ -1,9 +1,9 @@
-import { IsMongoId, IsNotEmpty, IsString } from "class-validator";
-import { Types } from "mongoose";
+import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 
 export class AcceptInvitationLinkDto {
-    @IsMongoId()
-    id: Types.ObjectId;
+    @IsEmail()
+    @IsNotEmpty()
+    email: string;
 
     @IsString()
     @IsNotEmpty()

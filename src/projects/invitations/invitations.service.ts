@@ -22,36 +22,41 @@ export class InvitationsService {
         private readonly mailerService: MailerService,
     ) {}
 
-    async generateInvitationToken(
-        id: Types.ObjectId,
+    async generateLinkToken(
+        projectId: Types.ObjectId,
         dto: ManageInvitationLinkDto,
     ): Promise<string> {
         const token = crypto.randomBytes(32).toString("hex");
         const hash = this.hashToken(token);
-        await this.projectsService.setInvitationHash(id, dto.name, hash);
-        // TODO is there are invitation accept page or accept only on backend route
-        return `https:/.../invite/${token}`;
+        await this.projectsService.setInvitationHash(
+            projectId,
+            dto.linkName,
+            hash,
+        );
+        return `${this.configService.get("DOMAIN_API")}/invitations/link_accept/${projectId}?token=${token}`;
     }
 
-    async deleteInvitationToken(
-        id: Types.ObjectId,
+    async deleteLinkToken(
+        projectId: Types.ObjectId,
         dto: ManageInvitationLinkDto,
     ) {
-        await this.projectsService.deleteInvitationHash(id, dto.name);
+        await this.projectsService.deleteInvitationHash(
+            projectId,
+            dto.linkName,
+        );
     }
 
     async acceptLink(projectId: Types.ObjectId, dto: AcceptInvitationLinkDto) {
         const hashedToken = this.hashToken(dto.token);
+        const userId = await this.usersService.getUserId(dto.email);
         const project = await this.projectsService.getProject(projectId);
         const isValid = project.invitationHashes.has(hashedToken);
         if (!isValid) throw new NotFoundException(Errors.LINK_INCORRECT);
         await this.projectsService.changeUserData(projectId, {
             position: "viewer",
             role: UserRole.VIEWER,
-            userId: dto.id,
+            userId,
         });
-        // TODO add redirect to the project page in controller
-        return "Success";
     }
 
     async sendInvitationEmail(
@@ -69,8 +74,7 @@ export class InvitationsService {
             userId,
             role: UserRole.INVITED,
         });
-        // TODO is there are invitation accept page or accept only on backend route
-        const url = `https://.../accept-invite-email?token=${token}`;
+        const url = `${this.configService.get("DOMAIN_API")}/invitations/email_accept/${projectId}?token=${token}`;
         const name = await this.projectsService.getProjectName(projectId);
         await this.mailerService.sendMail({
             to: dto.email,
@@ -78,10 +82,9 @@ export class InvitationsService {
             template: "invite",
             context: { url, projectName: name, role: dto.role },
         });
-        // TODO отправляется 3000мс, надо чтобы не блокировались остальные функции на фронте
     }
 
-    async acceptInvitation(
+    async acceptEmail(
         projectId: Types.ObjectId,
         dto: ManageInvitationEmailDto,
     ) {
@@ -91,7 +94,6 @@ export class InvitationsService {
             userId,
             role: dto.role,
         });
-        // TODO Redirect to project page
     }
 
     async generateEmailToken(email: string, role: UserRole, position?: string) {

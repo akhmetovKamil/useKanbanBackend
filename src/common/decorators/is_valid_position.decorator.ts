@@ -17,10 +17,10 @@ export class IsValidPositionConstraint implements ValidatorConstraintInterface {
         private readonly projectsModel: ReturnModelType<typeof ProjectsSchema>,
     ) {}
 
-    async validate(position: string, args): Promise<boolean> {
-        const projectId = args.object.projectId;
-        const project = await this.projectsModel.findById(projectId);
-        return project ? project.positions.includes(position) : false;
+    async validate(): Promise<boolean> {
+        // const projectId = args.object.projectId;
+        // const project = await this.projectsModel.findById(projectId);
+        return false;
     }
 
     defaultMessage(): string {

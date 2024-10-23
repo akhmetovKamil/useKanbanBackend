@@ -1,30 +1,88 @@
-import { Controller, Param, Post } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Delete,
+    HttpCode,
+    HttpStatus,
+    Param,
+    Post,
+    Query,
+    Redirect,
+    Req,
+    Res,
+    UseGuards,
+} from "@nestjs/common";
 import { Types } from "mongoose";
 import { ParseObjectIdPipe } from "../../common/pipes/parse_object_id.pipe";
 import { InvitationsService } from "./invitations.service";
-import { UserRole } from "../../common/types/roles.types";
+import { InvitationStrategy } from "./strategies/invitation.strategy";
+import { Public } from "../../common/decorators/public.decorator";
+import { ConfigService } from "@nestjs/config";
+import { ManageInvitationEmailDto } from "./dto/manage.invitation_email.dto";
+import { ManageInvitationLinkDto } from "./dto/manage.invitation_link.dto";
+import { GetCurrentEmail } from "../../common/decorators/get_current_email.decorator";
 
 @Controller("invitations")
 export class InvitationsController {
-    constructor(private readonly invitationsService: InvitationsService) {}
+    constructor(
+        private readonly invitationsService: InvitationsService,
+        private readonly configService: ConfigService,
+    ) {}
 
-    // @Post("invite/:projectId/:token")
-    // async acceptInvitation(
-    //     @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
-    //     @Param("token") token: string,
-    // ) {
-    //     // Use projectId and token
-    // }
-
-    @Post("test/:projectId")
-    async test(
+    @Post("link/:projectId")
+    @HttpCode(HttpStatus.CREATED)
+    async generateLinkToken(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
+        @Body() dto: ManageInvitationLinkDto,
+    ): Promise<string> {
+        return this.invitationsService.generateLinkToken(projectId, dto);
+    }
+
+    @Delete(":projectId")
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async deleteLinkToken(
+        @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
+        @Body() dto: ManageInvitationLinkDto,
     ) {
-        return this.invitationsService.sendInvitationEmail(
-            projectId,
-            "alicesun65@gmail.com",
-            UserRole.ADMIN,
-            "default position",
-        );
+        await this.invitationsService.deleteLinkToken(projectId, dto);
+    }
+
+    @Redirect("https://google.com", 302)
+    @Post("link_accept/:projectId")
+    async acceptLinkToken(
+        @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
+        @Query("token") token: string,
+        @GetCurrentEmail() email: string,
+    ) {
+        await this.invitationsService.acceptLink(projectId, { email, token });
+        return { url: `${this.configService.get("URL_PROJECT")}/${projectId}` };
+    }
+
+    @Post("email/:projectId")
+    async sendEmail(
+        @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
+        @Body() dto: ManageInvitationEmailDto,
+        @Res() res,
+    ) {
+        res.send("success");
+        await this.invitationsService.sendInvitationEmail(projectId, dto);
+    }
+
+    @Redirect("https://google.com", 302)
+    @Public()
+    @UseGuards(InvitationStrategy)
+    @Post("email_accept/:projectId")
+    async acceptEmail(
+        @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
+        @Query("token") token: string,
+        @Req() req,
+    ) {
+        const { email, role, position } = req.user;
+        await this.invitationsService.acceptEmail(projectId, {
+            email,
+            role,
+            position,
+        });
+        return { url: `${this.configService.get("URL_PROJECT")}/${projectId}` };
     }
 }
