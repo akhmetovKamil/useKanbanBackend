@@ -8,10 +8,11 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { genSalt, hash, compare } from "bcryptjs";
 import { AuthSignupDto } from "./dto/auth.signup.dto";
-import { JwtTokens } from "./types/jwt.tokens.type";
+import { JwtTokens, signType } from "./types/jwt.tokens.type";
 import { AuthSigninDto } from "./dto/auth.signin.dto";
 import { Errors } from "../common/exception.constants";
 import { createHash } from "crypto";
+import { Types } from "mongoose";
 
 @Injectable()
 export class AuthService {
@@ -21,24 +22,24 @@ export class AuthService {
         private readonly configService: ConfigService,
     ) {}
 
-    async signup({ password, ...dto }: AuthSignupDto): Promise<JwtTokens> {
+    async signup({ password, ...dto }: AuthSignupDto): Promise<signType> {
         if (await this.userService.getUser(dto.email))
             throw new BadRequestException(Errors.ALREADY_REGISTERED);
         const hash = await this.simpleHash(password);
-        await this.userService.createUser(dto.email, {
+        const user = await this.userService.createUser(dto.email, {
             ...dto,
             hash,
         });
-        return this.getTokens(dto.email);
+        return {jwt: await this.getTokens(dto.email,user._id),user};
     }
 
-    async signin(dto: AuthSigninDto): Promise<JwtTokens> {
+    async signin(dto: AuthSigninDto): Promise<signType> {
         const user = await this.userService.getUser(dto.email);
         if (!user) throw new BadRequestException(Errors.USER_NOT_FOUND);
         const isPasswordValid = await compare(dto.password, user.hash);
         if (!isPasswordValid)
             throw new BadRequestException(Errors.USER_NOT_FOUND);
-        return this.getTokens(dto.email);
+        return {jwt: await this.getTokens(dto.email,user._id),user};
     }
 
     async logout(email: string): Promise<void> {
@@ -56,7 +57,7 @@ export class AuthService {
         const rtMatches = await this.compareTokens(rt, user.rtHash);
         console.log(`rtMatches: ${rtMatches}`);
         if (!rtMatches) throw new UnauthorizedException(Errors.RT_HASH_INVALID);
-        return await this.getTokens(email);
+        return await this.getTokens(email, user._id);
     }
 
     async simpleHash(data: string): Promise<string> {
@@ -75,22 +76,22 @@ export class AuthService {
         return await compare(sha256Hash, hashedToken);
     }
 
-    async getTokens(email: string): Promise<JwtTokens> {
-        const tokens = await this.generateTokens(email);
+    async getTokens(email: string, id: Types.ObjectId): Promise<JwtTokens> {
+        const tokens = await this.generateTokens(email, id);
         const rtHash = await this.hashToken(tokens.refresh_token);
         await this.userService.updateRtHash(email, rtHash);
         return tokens;
     }
 
-    async generateTokens(email: string): Promise<JwtTokens> {
+    async generateTokens(email: string, id: Types.ObjectId): Promise<JwtTokens> {
         const [at, rt] = await Promise.all([
             this.generateToken(
-                email,
+                email, id,
                 15 * 60,
                 this.configService.get("AT_SECRET"),
             ),
             this.generateToken(
-                email,
+                email, id,
                 60 * 60 * 24 * 7,
                 this.configService.get("RT_SECRET"),
             ),
@@ -103,11 +104,12 @@ export class AuthService {
 
     async generateToken(
         email: string,
+        id: Types.ObjectId,
         expiresIn: number,
         secret: string,
     ): Promise<string> {
         return await this.jwtService.signAsync(
-            { email },
+            { email, id },
             { expiresIn, secret },
         );
     }
