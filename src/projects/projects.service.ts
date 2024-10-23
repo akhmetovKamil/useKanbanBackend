@@ -10,6 +10,7 @@ import { UserRole } from "../common/types/roles.types";
 import { UpdateProjectInfoDto } from "./dto/update.project_info.dto";
 import { UpdateProjectNameDto } from "./dto/update.project_name.dto";
 import { Errors } from "../common/exception.constants";
+import { DeleteProjectUserDto } from "./dto/delete.project_user.dto";
 
 @Injectable()
 export class ProjectsService {
@@ -42,7 +43,7 @@ export class ProjectsService {
 
     async getProjects(email: string): Promise<ProjectsSchema[]> {
         const user = await this.usersService.getProjectsPopulated(email);
-        return user.projects;
+        return user.projects as ProjectsSchema[];
     }
 
     async updateProjectInfo(id: Types.ObjectId, dto: UpdateProjectInfoDto) {
@@ -65,8 +66,8 @@ export class ProjectsService {
             .exec();
     }
 
-    // TODO delete from all users.projects this id
     async deleteProject(id: Types.ObjectId): Promise<void> {
+        await this.usersService.deleteProjectFromUsers(id);
         await this.projectsSchema.findByIdAndDelete(id).exec();
     }
 
@@ -75,8 +76,6 @@ export class ProjectsService {
         return project.name;
     }
 
-    // TODO is should be email or id
-    // TODO add projectId to user here
     async changeUserData(
         projectId: Types.ObjectId,
         team: ChangeProjectTeamDto,
@@ -88,12 +87,10 @@ export class ProjectsService {
         );
     }
 
-    // TODO change user.projects
-    async deleteUser(projectId: Types.ObjectId, email: string) {
-        const userId = this.usersService.getUserId(email);
+    async deleteUser(projectId: Types.ObjectId, dto: DeleteProjectUserDto) {
         await this.projectsSchema.findByIdAndUpdate(
             projectId,
-            { $unset: { [`usersData.${userId}`]: "" } },
+            { $set: { [`usersData.${dto.id}.role`]: UserRole.DISABLED } },
             { new: true, useFindAndModify: false },
         );
     }

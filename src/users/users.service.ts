@@ -1,9 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "nestjs-typegoose";
 import { UsersSchema } from "./users.schema";
 import { ReturnModelType } from "@typegoose/typegoose";
 import { CreateUserDto } from "./dto/create.user.dto";
 import { Types } from "mongoose";
+import { Errors } from "../common/exception.constants";
 
 @Injectable()
 export class UsersService {
@@ -12,7 +13,7 @@ export class UsersService {
         private readonly usersSchema: ReturnModelType<typeof UsersSchema>,
     ) {}
 
-    async createUser(email: string, dto: CreateUserDto) {
+    async createUser(email: string, dto: CreateUserDto): Promise<UsersSchema> {
         return await new this.usersSchema({
             email: email,
             name: dto.name,
@@ -22,8 +23,10 @@ export class UsersService {
         }).save();
     }
 
-    async getUser(email: string) {
-        return this.usersSchema.findOne({ email });
+    async getUser(email: string): Promise<UsersSchema> {
+        const user = this.usersSchema.findOne({ email });
+        if (!user) throw new NotFoundException(Errors.USER_NOT_FOUND);
+        return user;
     }
 
     async getUserId(email: string): Promise<Types.ObjectId> {
@@ -31,11 +34,8 @@ export class UsersService {
         return user ? user._id : null;
     }
 
-    async getProjectsPopulated(email: string) {
-        return this.usersSchema
-            .findOne({ email })
-            .populate("projects")
-            .execPopulate();
+    async getProjectsPopulated(email: string): Promise<UsersSchema> {
+        return this.usersSchema.findOne({ email }).populate("projects").exec();
     }
 
     async updateRtHash(email: string, hash: string): Promise<void> {
@@ -46,6 +46,13 @@ export class UsersService {
         await this.usersSchema.findOneAndUpdate(
             { email },
             { $addToSet: { projects: projectId } },
+        );
+    }
+
+    async deleteProjectFromUsers(projectId: Types.ObjectId): Promise<void> {
+        await this.usersSchema.updateMany(
+            { projects: projectId },
+            { $pull: { projects: projectId } },
         );
     }
 }

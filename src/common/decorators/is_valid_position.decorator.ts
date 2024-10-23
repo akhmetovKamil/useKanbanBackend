@@ -29,7 +29,7 @@ export class IsValidPositionConstraint implements ValidatorConstraintInterface {
 }
 
 export function IsValidPosition(validationOptions?: ValidationOptions) {
-    return function (object: Object, propertyName: string) {
+    return function (object: object, propertyName: string) {
         registerDecorator({
             target: object.constructor,
             propertyName: propertyName,
