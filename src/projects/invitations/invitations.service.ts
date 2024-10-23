@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { Types } from "mongoose";
 import { ProjectsService } from "../projects.service";
 import * as crypto from "crypto";
@@ -8,6 +8,8 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { UsersService } from "../../users/users.service";
 import { MailerService } from "@nestjs-modules/mailer";
+import { Errors } from "../../common/exception.constants";
+import { ManageInvitationLinkDto } from "./dto/manage.invitation_link.dto";
 
 @Injectable()
 export class InvitationsService {
@@ -21,18 +23,20 @@ export class InvitationsService {
 
     async generateInvitationToken(
         id: Types.ObjectId,
-        name: string,
+        dto: ManageInvitationLinkDto,
     ): Promise<string> {
         const token = crypto.randomBytes(32).toString("hex");
         const hash = this.hashToken(token);
-        await this.projectsService.setInvitationHash(id, name, hash);
+        await this.projectsService.setInvitationHash(id, dto.name, hash);
         // TODO is there are invitation accept page or accept only on backend route
         return `https:/.../invite/${token}`;
     }
 
-    // TODO extract dto
-    async deleteInvitationToken(id: Types.ObjectId, name: string) {
-        await this.projectsService.deleteInvitationHash(id, name);
+    async deleteInvitationToken(
+        id: Types.ObjectId,
+        dto: ManageInvitationLinkDto,
+    ) {
+        await this.projectsService.deleteInvitationHash(id, dto.name);
     }
 
     async acceptLink(projectId: Types.ObjectId, dto: AcceptInvitationLinkDto) {
@@ -40,7 +44,7 @@ export class InvitationsService {
         console.log(hashedToken);
         const project = await this.projectsService.getProject(projectId);
         const isValid = project.invitationHashes.has(hashedToken);
-        if (!isValid) throw new Error("Invalid invitation link"); // TODO wrong error throwing
+        if (!isValid) throw new NotFoundException(Errors.LINK_INCORRECT);
         await this.projectsService.changeUserData(projectId, {
             position: "viewer", // TODO implement default position
             role: UserRole.VIEWER,
@@ -81,7 +85,6 @@ export class InvitationsService {
         email: string,
         role: UserRole,
     ) {
-        // TODO set role to Roles.Needed
         const id = await this.usersService.getUserId(email);
         await this.projectsService.changeUserData(projectId, {
             position: "random", // TODO implement default position

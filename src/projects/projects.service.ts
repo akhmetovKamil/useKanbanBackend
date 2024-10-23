@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "nestjs-typegoose";
 import { ReturnModelType } from "@typegoose/typegoose";
 import { ProjectsSchema } from "./projects.schema";
@@ -9,6 +9,7 @@ import { ChangeProjectTeamDto } from "./dto/change.project_team.dto";
 import { UserRole } from "../common/types/roles.types";
 import { UpdateProjectInfoDto } from "./dto/update.project_info.dto";
 import { UpdateProjectNameDto } from "./dto/update.project_name.dto";
+import { Errors } from "../common/exception.constants";
 
 @Injectable()
 export class ProjectsService {
@@ -35,7 +36,7 @@ export class ProjectsService {
 
     async getProject(id: Types.ObjectId): Promise<ProjectsSchema> {
         const project = this.projectsSchema.findById(id).exec();
-        if (!project) throw new Error("нет проекта"); // TODO wrong error throwing
+        if (!project) throw new NotFoundException(Errors.PROJECT_NOT_FOUND);
         return project;
     }
 
@@ -64,6 +65,7 @@ export class ProjectsService {
             .exec();
     }
 
+    // TODO delete from all users.projects this id
     async deleteProject(id: Types.ObjectId): Promise<void> {
         await this.projectsSchema.findByIdAndDelete(id).exec();
     }
@@ -86,6 +88,7 @@ export class ProjectsService {
         );
     }
 
+    // TODO change user.projects
     async deleteUser(projectId: Types.ObjectId, email: string) {
         const userId = this.usersService.getUserId(email);
         await this.projectsSchema.findByIdAndUpdate(

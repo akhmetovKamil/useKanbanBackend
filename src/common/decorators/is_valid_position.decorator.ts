@@ -24,7 +24,7 @@ export class IsValidPositionConstraint implements ValidatorConstraintInterface {
     }
 
     defaultMessage(): string {
-        return "Position $value is not valid!"; // TODO Check error and fix
+        return "Неправильная должность";
     }
 }
 
