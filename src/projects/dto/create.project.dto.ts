@@ -7,6 +7,16 @@ import {
 } from "class-validator";
 import { Type } from "class-transformer";
 
+export class Info {
+    @IsString()
+    @IsNotEmpty()
+    company: string;
+
+    @IsString()
+    @IsNotEmpty()
+    description: string;
+}
+
 export class CreateProjectDto {
     @IsString()
     @IsNotEmpty()
@@ -20,14 +30,4 @@ export class CreateProjectDto {
     @ArrayNotEmpty()
     @IsString({ each: true })
     positions: string[];
-}
-
-export class Info {
-    @IsString()
-    @IsNotEmpty()
-    company: string;
-
-    @IsString()
-    @IsNotEmpty()
-    description: string;
 }

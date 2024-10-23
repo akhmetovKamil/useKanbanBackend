@@ -69,9 +69,11 @@ export class InvitationsService {
         await this.mailerService.sendMail({
             to: email,
             subject: "Приглашение в проект",
-            template: "./invite",
-            context: { url, name },
+            template: "invite",
+            context: { url, projectName: name },
         });
+        console.log("success");
+        // TODO отправляется 3000мс, надо чтобы не блокировались остальные функции на фронте
     }
 
     async acceptInvitation(

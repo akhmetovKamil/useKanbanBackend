@@ -5,7 +5,10 @@ import { ConfigService } from "@nestjs/config";
 import { payloadType } from "../types/invitation_strategy.payload.type";
 
 @Injectable()
-export class InvitationStrategy extends PassportStrategy(Strategy, "jwt") {
+export class InvitationStrategy extends PassportStrategy(
+    Strategy,
+    "jwt-invitation",
+) {
     constructor(private readonly configService: ConfigService) {
         super({
             jwtFromRequest: ExtractJwt.fromUrlQueryParameter("token"),
