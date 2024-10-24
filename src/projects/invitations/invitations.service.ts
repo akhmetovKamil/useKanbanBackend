@@ -75,12 +75,13 @@ export class InvitationsService {
             role: UserRole.INVITED,
         });
         const url = `${this.configService.get("DOMAIN_API")}/invitations/email_accept/${projectId}?token=${token}`;
-        const name = await this.projectsService.getProjectName(projectId);
+        const projectName =
+            await this.projectsService.getProjectName(projectId);
         await this.mailerService.sendMail({
             to: dto.email,
             subject: "Приглашение в проект",
             template: "invite",
-            context: { url, projectName: name, role: dto.role },
+            context: { url, projectName, role: dto.role },
         });
     }
 

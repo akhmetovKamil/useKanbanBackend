@@ -87,10 +87,10 @@ export class ProjectsService {
         );
     }
 
-    async deleteUser(projectId: Types.ObjectId, dto: DeleteProjectUserDto) {
+    async deleteUser(projectId: Types.ObjectId, userId: Types.ObjectId) {
         await this.projectsSchema.findByIdAndUpdate(
             projectId,
-            { $set: { [`usersData.${dto.id}.role`]: UserRole.DISABLED } },
+            { $set: { [`usersData.${userId}.role`]: UserRole.DISABLED } },
             { new: true, useFindAndModify: false },
         );
     }
