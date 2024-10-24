@@ -1,0 +1,23 @@
+meta {
+  name: sendEmail
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{host}}/invitations/email/671a8f55c4370024d46d2ed4
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{at}}
+}
+
+body:json {
+  {
+    "email":"alicesun65@gmail.com",
+    "role":"admin",
+    "position":"backend"
+  }
+}

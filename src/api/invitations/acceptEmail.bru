@@ -1,0 +1,19 @@
+meta {
+  name: acceptEmail
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:3000/api/invitations/email_accept/671a8f55c4370024d46d2ed4?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFsaWNlc3VuNjVAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwicG9zaXRpb24iOiJiYWNrZW5kIiwiaWF0IjoxNzI5Nzk4ODExLCJleHAiOjE3Mjk4MDA2MTF9.r75IkJgrfIY0arJxV7BH1YfYTbKi5Y8wpdpXyOeVOyE
+  body: none
+  auth: bearer
+}
+
+params:query {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFsaWNlc3VuNjVAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwicG9zaXRpb24iOiJiYWNrZW5kIiwiaWF0IjoxNzI5Nzk4ODExLCJleHAiOjE3Mjk4MDA2MTF9.r75IkJgrfIY0arJxV7BH1YfYTbKi5Y8wpdpXyOeVOyE
+}
+
+auth:bearer {
+  token: {{at}}
+}

@@ -1,0 +1,15 @@
+meta {
+  name: deleteLink
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{host}}/invitations/671a8f55c4370024d46d2ed4/FirstLink
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{at}}
+}
