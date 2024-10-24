@@ -6,6 +6,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { InvitationStrategy } from "./strategies/invitation.strategy";
 import { UsersModule } from "../../users/users.module";
 import { ProjectsModule } from "../projects.module";
+import { BeforeAcceptGuard } from "./guards/before_accept.guard";
 
 @Module({
     imports: [
@@ -14,7 +15,7 @@ import { ProjectsModule } from "../projects.module";
         UsersModule,
         JwtModule.register({}),
     ],
-    providers: [InvitationsService, InvitationStrategy],
+    providers: [InvitationsService, InvitationStrategy, BeforeAcceptGuard],
     controllers: [InvitationsController],
 })
 export class InvitationsModule {}

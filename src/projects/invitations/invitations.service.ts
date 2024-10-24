@@ -36,21 +36,17 @@ export class InvitationsService {
         return `${this.configService.get("DOMAIN_API")}/invitations/link_accept/${projectId}?token=${token}`;
     }
 
-    async deleteLinkToken(
-        projectId: Types.ObjectId,
-        dto: ManageInvitationLinkDto,
-    ) {
-        await this.projectsService.deleteInvitationHash(
-            projectId,
-            dto.linkName,
-        );
+    async deleteLinkToken(projectId: Types.ObjectId, linkName: string) {
+        await this.projectsService.deleteInvitationHash(projectId, linkName);
     }
 
     async acceptLink(projectId: Types.ObjectId, dto: AcceptInvitationLinkDto) {
         const hashedToken = this.hashToken(dto.token);
         const userId = await this.usersService.getUserId(dto.email);
         const project = await this.projectsService.getProject(projectId);
-        const isValid = project.invitationHashes.has(hashedToken);
+        const isValid = Array.from(project.invitationHashes.values()).includes(
+            hashedToken,
+        );
         if (!isValid) throw new NotFoundException(Errors.LINK_INCORRECT);
         await this.projectsService.changeUserData(projectId, {
             position: "viewer",
@@ -74,7 +70,7 @@ export class InvitationsService {
             userId,
             role: UserRole.INVITED,
         });
-        const url = `${this.configService.get("DOMAIN_API")}/invitations/email_accept/${projectId}?token=${token}`;
+        const url = `${this.configService.get("FRONTEND_APPROVE_URL")}/${projectId}?token=${token}`;
         const projectName =
             await this.projectsService.getProjectName(projectId);
         await this.mailerService.sendMail({

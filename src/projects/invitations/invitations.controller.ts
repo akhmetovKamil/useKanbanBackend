@@ -2,6 +2,7 @@ import {
     Body,
     Controller,
     Delete,
+    Get,
     HttpCode,
     HttpStatus,
     Param,
@@ -21,6 +22,8 @@ import { ConfigService } from "@nestjs/config";
 import { ManageInvitationEmailDto } from "./dto/manage.invitation_email.dto";
 import { ManageInvitationLinkDto } from "./dto/manage.invitation_link.dto";
 import { GetCurrentEmail } from "../../common/decorators/get_current_email.decorator";
+import { BeforeAcceptGuard } from "./guards/before_accept.guard";
+import { InvitationsGuard } from "./guards/invitations.guard";
 
 @Controller("invitations")
 export class InvitationsController {
@@ -38,13 +41,13 @@ export class InvitationsController {
         return this.invitationsService.generateLinkToken(projectId, dto);
     }
 
-    @Delete(":projectId")
+    @Delete(":projectId/:linkName")
     @HttpCode(HttpStatus.NO_CONTENT)
     async deleteLinkToken(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
-        @Body() dto: ManageInvitationLinkDto,
+        @Param("linkName") linkName: string,
     ) {
-        await this.invitationsService.deleteLinkToken(projectId, dto);
+        await this.invitationsService.deleteLinkToken(projectId, linkName);
     }
 
     @Redirect("https://google.com", 302)
@@ -70,7 +73,7 @@ export class InvitationsController {
 
     @Redirect("https://google.com", 302)
     @Public()
-    @UseGuards(InvitationStrategy)
+    @UseGuards(InvitationsGuard, BeforeAcceptGuard)
     @Post("email_accept/:projectId")
     async acceptEmail(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,

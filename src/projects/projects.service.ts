@@ -96,14 +96,13 @@ export class ProjectsService {
 
     async leaveProject(projectId: Types.ObjectId, email: string) {
         const userId = await this.usersService.getUserId(email);
-        console.log(userId);
         await this.deleteUser(projectId, userId);
     }
 
     async setInvitationHash(
         projectId: Types.ObjectId,
-        hash: string,
         name: string,
+        hash: string,
     ) {
         await this.projectsSchema.findByIdAndUpdate(projectId, {
             $set: { [`invitationHashes.${name}`]: hash },
@@ -111,8 +110,12 @@ export class ProjectsService {
     }
 
     async deleteInvitationHash(projectId: Types.ObjectId, name: string) {
-        await this.projectsSchema.findByIdAndUpdate(projectId, {
-            $unset: { [`invitationHashes.${name}`]: "" },
-        });
+        await this.projectsSchema
+            .findByIdAndUpdate(
+                projectId,
+                { $unset: { [`invitationHashes.${name}`]: 1 } },
+                { new: true, useFindAndModify: false },
+            )
+            .exec();
     }
 }
