@@ -43,9 +43,10 @@ export class UsersService {
     }
 
     async addProject(email: string, projectId: Types.ObjectId): Promise<void> {
-        await this.usersSchema.findOneAndUpdate(
-            { email },
-            { $addToSet: { projects: projectId } },
+        const userId = await this.getUserId(email);
+        await this.usersSchema.updateOne(
+            { _id: userId },
+            { $push: { projects: projectId } },
         );
     }
 

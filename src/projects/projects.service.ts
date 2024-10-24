@@ -10,7 +10,6 @@ import { UserRole } from "../common/types/roles.types";
 import { UpdateProjectInfoDto } from "./dto/update.project_info.dto";
 import { UpdateProjectNameDto } from "./dto/update.project_name.dto";
 import { Errors } from "../common/exception.constants";
-import { DeleteProjectUserDto } from "./dto/delete.project_user.dto";
 
 @Injectable()
 export class ProjectsService {
@@ -36,7 +35,7 @@ export class ProjectsService {
     }
 
     async getProject(id: Types.ObjectId): Promise<ProjectsSchema> {
-        const project = this.projectsSchema.findById(id).exec();
+        const project = await this.projectsSchema.findById(id).exec();
         if (!project) throw new NotFoundException(Errors.PROJECT_NOT_FOUND);
         return project;
     }
@@ -82,7 +81,7 @@ export class ProjectsService {
     ) {
         await this.projectsSchema.findByIdAndUpdate(
             projectId,
-            { $set: { [`usersData.${team.userId}`]: team } },
+            { $set: { [`team.${team.userId}`]: team } },
             { new: true, useFindAndModify: false },
         );
     }
@@ -90,13 +89,14 @@ export class ProjectsService {
     async deleteUser(projectId: Types.ObjectId, userId: Types.ObjectId) {
         await this.projectsSchema.findByIdAndUpdate(
             projectId,
-            { $set: { [`usersData.${userId}.role`]: UserRole.DISABLED } },
+            { $set: { [`team.${userId}.role`]: UserRole.DISABLED } },
             { new: true, useFindAndModify: false },
         );
     }
 
     async leaveProject(projectId: Types.ObjectId, email: string) {
         const userId = await this.usersService.getUserId(email);
+        console.log(userId);
         await this.deleteUser(projectId, userId);
     }
 

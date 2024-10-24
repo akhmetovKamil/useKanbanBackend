@@ -1,0 +1,15 @@
+meta {
+  name: leaveProject
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{host}}/projects/leave/671a6d1def27092aeaa9c0fd
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{at}}
+}

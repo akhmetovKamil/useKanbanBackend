@@ -82,7 +82,7 @@ export class AuthService {
         const [at, rt] = await Promise.all([
             this.generateToken(
                 email,
-                15 * 60,
+                15 * 60 * 60,
                 this.configService.get("AT_SECRET"),
             ),
             this.generateToken(

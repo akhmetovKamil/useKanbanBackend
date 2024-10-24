@@ -36,7 +36,7 @@ export class ProjectsController {
         return this.projectsService.getProjects(email);
     }
 
-    @Get(":projectId")
+    @Get("/:projectId")
     async getProject(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
     ) {

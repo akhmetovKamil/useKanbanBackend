@@ -12,7 +12,7 @@ class Info {
 }
 
 class Team {
-    @prop({ required: true, type: () => String })
+    @prop({ type: () => String, default: "default_position" })
     position: string;
 
     @prop({ required: true, enum: UserRole })
@@ -20,7 +20,7 @@ class Team {
 }
 
 @pre<ProjectsSchema>("save", function (next) {
-    this.team.forEach((value) => {
+    this.team.forEach((value, key) => {
         if (!value.position) {
             value.position = "default_position";
         }
