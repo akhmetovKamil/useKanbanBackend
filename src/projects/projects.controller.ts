@@ -51,6 +51,14 @@ export class ProjectsController {
         return this.projectsService.deleteUser(projectId, userId);
     }
 
+    @Delete("leave/:projectId")
+    async leaveProject(
+        @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
+        @GetCurrentEmail() email: string,
+    ) {
+        return this.projectsService.leaveProject(projectId, email);
+    }
+
     @Delete("project/:projectId")
     async deleteProject(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,

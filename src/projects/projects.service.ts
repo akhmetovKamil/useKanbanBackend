@@ -95,6 +95,11 @@ export class ProjectsService {
         );
     }
 
+    async leaveProject(projectId: Types.ObjectId, email: string) {
+        const userId = await this.usersService.getUserId(email);
+        await this.deleteUser(projectId, userId);
+    }
+
     async setInvitationHash(
         projectId: Types.ObjectId,
         hash: string,
