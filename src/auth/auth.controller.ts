@@ -7,7 +7,7 @@ import {
     UseGuards,
 } from "@nestjs/common";
 import { Public } from "../common/decorators/public.decorator";
-import { JwtTokens } from "./types/jwt.tokens.type";
+import { JwtTokens, SignType } from "./types/jwt.tokens.type";
 import { GetCurrentEmail } from "../common/decorators/get_current_email.decorator";
 import { RtGuard } from "./guards/rt.guard";
 import { GetCurrentRt } from "../common/decorators/get_current_rt.decorator";
@@ -22,14 +22,14 @@ export class AuthController {
     @Public()
     @Post("signup")
     @HttpCode(HttpStatus.CREATED)
-    async register(@Body() dto: SignupAuthDto): Promise<JwtTokens> {
+    async register(@Body() dto: SignupAuthDto): Promise<SignType> {
         return await this.authService.signup(dto);
     }
 
     @Public()
     @Post("signin")
     @HttpCode(HttpStatus.OK)
-    async login(@Body() dto: SigninAuthDto): Promise<JwtTokens> {
+    async login(@Body() dto: SigninAuthDto): Promise<SignType> {
         return await this.authService.signin(dto);
     }
 
