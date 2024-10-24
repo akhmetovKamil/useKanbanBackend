@@ -1,0 +1,108 @@
+@startuml
+
+class User {
+    - _id: ObjectID
+    - email: string
+    - name: string
+    - surname: string
+    - patronymic: string
+    - projects: Project[]
+    - currentMood: number
+
+    + createUser(email: string, dto: CreateUserDto)
+    + getUser(email: string)
+    + getUserId(email: string): Types.ObjectId
+    + getProjectsPopulated(email: string)
+    + updateRtHash(email: string, hash: string): void
+    + addProject(email: string, projectId: Types.ObjectId): void
+}
+
+class Project {
+    - _id: ObjectID
+    - name: string
+    - positions: string[]
+    - info: Info
+    - desks: Desk[]
+    - usersData: Map<ObjectID, UserData>
+
+    + createProject(email: string, dto: CreateProjectDto): Project
+    + getProject(id: Types.ObjectId): Project
+    + getProjects(email: string): Project[]
+    + updateProjectInfo(id: Types.ObjectId, dto: ProjectsUpdateInfoDto)
+    + updateProjectName(id: Types.ObjectId, dto: ProjectsUpdateNameDto)
+    + deleteProject(id: Types.ObjectId): void
+    + changeUserData(projectId: Types.ObjectId, team: TeamChangeDto)
+    + deleteUser(projectId: Types.ObjectId, email: string)
+}
+
+class Info {
+    - company: string
+    - description: string
+}
+
+class UserData {
+    - role: number
+    - position: string
+}
+
+class Desk {
+    - _id: ObjectID
+    - columns: Column[]
+    - name: string
+    - description: string
+}
+
+class Column {
+    - _id: ObjectID
+    - name: string
+    - index: number
+    - tasks: Task[]
+}
+
+class Task {
+    - _id: ObjectID
+    - name: string
+    - description: string
+    - author: User
+    - assigned: User
+    - comments: Comment[]
+    - deadlineDate: Date
+    - status: number
+    - priority: number
+    - storyPoint?: number
+    - logs: []
+}
+
+class Comment {
+    - author: User
+    - message: string
+}
+
+class Auth {
+    - userService: User
+
+    + signup(dto: SignupAuthDto): Promise<JwtTokens>
+    + signin(dto: SigninAuthDto): Promise<JwtTokens>
+    + logout(email: string): Promise<void>
+    + refresh(email: string, rt: string): Promise<JwtTokens>
+    + simpleHash(data: string): Promise<string>
+    + hashToken(token: string): Promise<string>
+    + compareTokens(token: string, hashedToken: string): Promise<boolean>
+    + getTokens(email: string): Promise<JwtTokens>
+    + generateTokens(email: string): Promise<JwtTokens>
+    + generateToken(email: string, expiresIn: number, secret: string): Promise<string>
+}
+
+User "1" *-- "many" Project
+Project "1" *-- "1" Info
+Project "1" *-- "many" Desk
+Project "1" *-- "many" UserData
+Desk "1" *-- "many" Column
+Column "1" *-- "many" Task
+Task "1" *-- "many" Comment
+Task "1" *-- "1" User : author
+Task "1" *-- "1" User : assigned
+Comment "1" *-- "1" User : author
+Auth "1" *-- "1" User
+
+@enduml

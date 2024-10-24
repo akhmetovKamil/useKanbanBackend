@@ -1,0 +1,30 @@
+meta {
+  name: createProject_docs
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{host}}/projects/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{at}}
+}
+
+body:json {
+  {
+    "name":"Second",
+    "info": {
+      "company": "cocacola",
+      "description":"prostda"
+    },
+    "position": "CEO"
+  }
+}
+
+docs {
+  ## Position опциональное поле
+}

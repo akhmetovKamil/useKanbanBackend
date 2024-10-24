@@ -1,0 +1,15 @@
+meta {
+  name: deleteUser
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{host}}/projects/user/671a6d2cef27092aeaa9c105/671a0e3f524756d9db50c4e9
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{at}}
+}

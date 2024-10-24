@@ -5,7 +5,7 @@ export type JwtTokens = {
     refresh_token: string;
 };
 
-export type signType = {
+export type SignType = {
     jwt: JwtTokens;
     user: UsersSchema;
-}
+};

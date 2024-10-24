@@ -1,7 +1,7 @@
 meta {
-  name: Exception_constants(Check_docs)
+  name: Exceptions
   type: http
-  seq: 2
+  seq: 1
 }
 
 get {
@@ -11,12 +11,19 @@ get {
 }
 
 docs {
+  export enum Errors {
       USER_NOT_FOUND = "Пользователь с таким email или паролем не найден!",
       ALREADY_REGISTERED = "Пользователь с таким email уже зарегестрирован!",
+      RT_HASH_NOT_FOUND = "Пользователь вышел из аккаунта!",
+      RT_HASH_INVALID = "Неверный refresh токен",
+      NOT_OBJECT_ID = "Id проекта не является ObjectId",
+      NOT_AUTHENTICATED = "access токен не валидный!",
+      PROJECT_NOT_FOUND = "Проект не существует!",
+      LINK_INCORRECT = "Неправильная ссылка!",
       NOT_AUTHORIZED = "Пользователь не авторизован!",
-      RT_HASH_NOT_FOUND = "Refresh token не найден!",
-      RT_HASH_INVALID = "Неверный refresh token!",
       CONNECTION_ERROR = "Ошибка подключения к серверу!",
       SERVER_ERROR = "Ошибка на сервере 404!",
       UNEXPECTED_ERROR = "Неизвестная ошибка!",
+  }
+  
 }

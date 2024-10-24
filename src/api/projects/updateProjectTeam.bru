@@ -1,0 +1,23 @@
+meta {
+  name: updateProjectTeam
+  type: http
+  seq: 9
+}
+
+put {
+  url: {{host}}/projects/team/671a6ebdc4370024d46d2ebc
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{at}}
+}
+
+body:json {
+  {
+    "position": "fronteder",
+    "role": "user",
+    "userId": "671a0e3f524756d9db50c4e9"
+  }
+}

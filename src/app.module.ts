@@ -8,6 +8,8 @@ import { UsersModule } from "./users/users.module";
 import { AuthModule } from "./auth/auth.module";
 import { APP_GUARD } from "@nestjs/core";
 import { AtGuard } from "./auth/guards/at.guard";
+import { ProjectsModule } from './projects/projects.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
     imports: [
@@ -19,6 +21,8 @@ import { AtGuard } from "./auth/guards/at.guard";
         }),
         UsersModule,
         AuthModule,
+        ProjectsModule,
+        MailModule,
     ],
     controllers: [AppController],
     providers: [
