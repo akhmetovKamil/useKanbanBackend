@@ -20,17 +20,16 @@ export class ProjectsService {
     ) {}
 
     async createProject(
-        email: string,
+        id: Types.ObjectId,
         dto: CreateProjectDto,
     ): Promise<ProjectsSchema> {
-        const userId = await this.usersService.getUserId(email);
         const team = new Map();
-        team.set(userId, {
+        team.set(id, {
             position: dto.position,
             role: UserRole.OWNER,
         });
         const newProject = new this.projectsSchema({ ...dto, team });
-        await this.usersService.addProject(email, newProject._id);
+        await this.usersService.addProject(id, newProject._id);
         return newProject.save();
     }
 
@@ -94,9 +93,8 @@ export class ProjectsService {
         );
     }
 
-    async leaveProject(projectId: Types.ObjectId, email: string) {
-        const userId = await this.usersService.getUserId(email);
-        await this.deleteUser(projectId, userId);
+    async leaveProject(projectId: Types.ObjectId, id: Types.ObjectId) {
+        await this.deleteUser(projectId, id);
     }
 
     async setInvitationHash(
@@ -117,5 +115,14 @@ export class ProjectsService {
                 { new: true, useFindAndModify: false },
             )
             .exec();
+    }
+
+    async getUserRoleByProjectId(
+        userId: Types.ObjectId,
+        projectId: Types.ObjectId,
+    ) {
+        const project = await this.getProject(projectId);
+        console.log(userId, project);
+        return project.team.get(userId).role;
     }
 }

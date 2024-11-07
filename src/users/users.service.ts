@@ -29,6 +29,12 @@ export class UsersService {
         return user;
     }
 
+    async getUserById(id: Types.ObjectId): Promise<UsersSchema> {
+        const user = this.usersSchema.findById(id).exec();
+        if (!user) throw new NotFoundException(Errors.USER_NOT_FOUND);
+        return user;
+    }
+
     async getUserId(email: string): Promise<Types.ObjectId> {
         const user = await this.usersSchema.findOne({ email }).exec();
         return user ? user._id : null;
@@ -38,14 +44,16 @@ export class UsersService {
         return this.usersSchema.findOne({ email }).populate("projects").exec();
     }
 
-    async updateRtHash(email: string, hash: string): Promise<void> {
-        await this.usersSchema.findOneAndUpdate({ email }, { rtHash: hash });
+    async updateRtHash(id: Types.ObjectId, hash: string): Promise<void> {
+        await this.usersSchema.findByIdAndUpdate(id, { rtHash: hash });
     }
 
-    async addProject(email: string, projectId: Types.ObjectId): Promise<void> {
-        const userId = await this.getUserId(email);
+    async addProject(
+        id: Types.ObjectId,
+        projectId: Types.ObjectId,
+    ): Promise<void> {
         await this.usersSchema.updateOne(
-            { _id: userId },
+            { _id: id },
             { $push: { projects: projectId } },
         );
     }
