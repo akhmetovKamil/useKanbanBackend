@@ -47,8 +47,9 @@ export class AuthController {
     @Post("refresh")
     async refresh(
         @GetCurrentId() id: Types.ObjectId,
+        @GetCurrentEmail() email: string,
         @GetCurrentRt() rt: string,
     ): Promise<JwtTokens> {
-        return await this.authService.refresh(id, rt);
+        return await this.authService.refresh(email, id, rt);
     }
 }

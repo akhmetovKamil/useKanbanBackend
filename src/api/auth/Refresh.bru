@@ -13,3 +13,8 @@ post {
 auth:bearer {
   token: {{rt}}
 }
+
+script:post-response {
+  bru.setEnvVar("at",res.body.access_token);
+  bru.setEnvVar("rt",res.body.refresh_token);
+}
