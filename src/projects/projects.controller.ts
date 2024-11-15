@@ -41,6 +41,7 @@ export class ProjectsController {
         return this.projectsService.getProjects(email);
     }
 
+    @Roles(UserRole.USER, UserRole.ADMIN, UserRole.OWNER, UserRole.VIEWER)
     @Get("/:projectId")
     async getProject(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
@@ -48,7 +49,7 @@ export class ProjectsController {
         return this.projectsService.getProject(projectId);
     }
 
-    @Roles(UserRole.OWNER)
+    @Roles(UserRole.ADMIN, UserRole.OWNER)
     @UseGuards(RBACGuard)
     @Delete("user/:projectId/:userId")
     async deleteUser(
@@ -58,6 +59,7 @@ export class ProjectsController {
         return this.projectsService.deleteUser(projectId, userId);
     }
 
+    @Roles(UserRole.USER, UserRole.ADMIN)
     @Delete("leave/:projectId")
     async leaveProject(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
@@ -66,6 +68,7 @@ export class ProjectsController {
         return this.projectsService.leaveProject(projectId, id);
     }
 
+    @Roles(UserRole.OWNER)
     @Delete("project/:projectId")
     async deleteProject(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
@@ -73,6 +76,7 @@ export class ProjectsController {
         return this.projectsService.deleteProject(projectId);
     }
 
+    @Roles(UserRole.ADMIN, UserRole.OWNER)
     @Put("info/:projectId")
     async updateProjectInfo(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
@@ -81,6 +85,7 @@ export class ProjectsController {
         return this.projectsService.updateProjectInfo(projectId, dto);
     }
 
+    @Roles(UserRole.ADMIN, UserRole.OWNER)
     @Put("name/:projectId")
     async updateProjectName(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
@@ -89,6 +94,7 @@ export class ProjectsController {
         return this.projectsService.updateProjectName(projectId, dto);
     }
 
+    @Roles(UserRole.ADMIN, UserRole.OWNER)
     @Put("team/:projectId")
     async updateProjectTeam(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
