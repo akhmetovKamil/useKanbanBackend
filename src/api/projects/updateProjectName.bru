@@ -1,0 +1,21 @@
+meta {
+  name: updateProjectName
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{host}}/projects/name/671a6ebdc4370024d46d2ebc
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{at}}
+}
+
+body:json {
+  {
+    "name": "new name"
+  }
+}

@@ -1,0 +1,53 @@
+meta {
+  name: Signup_docs
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{host}}/auth/signup
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "new212@gmail.com",
+    "name": "Kfql",
+    "surname": "Prostdad",
+    "patronymic": "Prostdada",
+    "password": "12345678"
+  }
+}
+
+script:post-response {
+  bru.setEnvVar("at",res.body.jwt.access_token);
+  bru.setEnvVar("rt",res.body.jwt.refresh_token)
+}
+
+docs {
+  # Validation
+  ### email
+  * is email
+  * is not empty
+  ### name
+  * min length 2
+  * max length 15
+  * is string
+  * is not empty
+  ### surname
+  * min length 2
+  * max length 15
+  * is string
+  * is not empty
+  ### patronymic
+  * min length 2
+  * max length 15
+  * is string
+  * is optional
+  ### password
+  * min length 8
+  * max length 14
+  * is string
+  * is not empty
+}

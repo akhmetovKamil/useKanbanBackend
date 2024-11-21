@@ -1,0 +1,22 @@
+meta {
+  name: updateProjectInfo
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{host}}/projects/info/671a6ebdc4370024d46d2ebc
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{at}}
+}
+
+body:json {
+  {
+    "company": "test change",
+    "description": "change too"
+  }
+}

@@ -1,0 +1,15 @@
+meta {
+  name: getUserProjects
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{host}}/projects/all
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{at}}
+}

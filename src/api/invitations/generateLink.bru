@@ -1,0 +1,21 @@
+meta {
+  name: generateLink
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{host}}/invitations/link/671a8f55c4370024d46d2ed4
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{at}}
+}
+
+body:json {
+  {
+    "linkName":"FirstLink"
+  }
+}
