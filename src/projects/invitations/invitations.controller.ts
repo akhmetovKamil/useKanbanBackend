@@ -16,7 +16,6 @@ import {
 import { Types } from "mongoose";
 import { ParseObjectIdPipe } from "../../common/pipes/parse_object_id.pipe";
 import { InvitationsService } from "./invitations.service";
-import { InvitationStrategy } from "./strategies/invitation.strategy";
 import { Public } from "../../common/decorators/public.decorator";
 import { ConfigService } from "@nestjs/config";
 import { ManageInvitationEmailDto } from "./dto/manage.invitation_email.dto";
@@ -24,6 +23,8 @@ import { ManageInvitationLinkDto } from "./dto/manage.invitation_link.dto";
 import { GetCurrentEmail } from "../../common/decorators/get_current_email.decorator";
 import { BeforeAcceptGuard } from "./guards/before_accept.guard";
 import { InvitationsGuard } from "./guards/invitations.guard";
+import { UserRole } from "../../common/types/roles.types";
+import { Roles } from "../../common/decorators/role.decorator";
 
 @Controller("invitations")
 export class InvitationsController {
@@ -32,6 +33,7 @@ export class InvitationsController {
         private readonly configService: ConfigService,
     ) {}
 
+    @Roles(UserRole.ADMIN, UserRole.OWNER)
     @Post("link/:projectId")
     @HttpCode(HttpStatus.CREATED)
     async generateLinkToken(
@@ -41,6 +43,7 @@ export class InvitationsController {
         return this.invitationsService.generateLinkToken(projectId, dto);
     }
 
+    @Roles(UserRole.ADMIN, UserRole.OWNER)
     @Delete(":projectId/:linkName")
     @HttpCode(HttpStatus.NO_CONTENT)
     async deleteLinkToken(
@@ -50,6 +53,7 @@ export class InvitationsController {
         await this.invitationsService.deleteLinkToken(projectId, linkName);
     }
 
+    @Roles(UserRole.INVITED)
     @Redirect("https://google.com", 302)
     @Post("link_accept/:projectId")
     async acceptLinkToken(
@@ -61,6 +65,7 @@ export class InvitationsController {
         return { url: `${this.configService.get("URL_PROJECT")}/${projectId}` };
     }
 
+    @Roles(UserRole.ADMIN, UserRole.OWNER)
     @Post("email/:projectId")
     async sendEmail(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
@@ -71,6 +76,7 @@ export class InvitationsController {
         await this.invitationsService.sendInvitationEmail(projectId, dto);
     }
 
+    @Roles(UserRole.INVITED)
     @Redirect("https://google.com", 302)
     @Public()
     @UseGuards(InvitationsGuard, BeforeAcceptGuard)

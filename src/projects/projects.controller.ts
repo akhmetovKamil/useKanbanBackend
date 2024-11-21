@@ -8,6 +8,7 @@ import {
     Param,
     Post,
     Put,
+    UseGuards,
 } from "@nestjs/common";
 import { ProjectsService } from "./projects.service";
 import { GetCurrentEmail } from "../common/decorators/get_current_email.decorator";
@@ -17,6 +18,10 @@ import { Types } from "mongoose";
 import { UpdateProjectInfoDto } from "./dto/update.project_info.dto";
 import { UpdateProjectNameDto } from "./dto/update.project_name.dto";
 import { ChangeProjectTeamDto } from "./dto/change.project_team.dto";
+import { Roles } from "../common/decorators/role.decorator";
+import { UserRole } from "../common/types/roles.types";
+import { RBACGuard } from "../auth/guards/rbac.guard";
+import { GetCurrentId } from "../common/decorators/get_current_id.decorator";
 
 @Controller("projects")
 export class ProjectsController {
@@ -25,10 +30,10 @@ export class ProjectsController {
     @Post()
     @HttpCode(HttpStatus.CREATED)
     async createProject(
-        @GetCurrentEmail() email: string,
+        @GetCurrentId() id: Types.ObjectId,
         @Body() dto: CreateProjectDto,
     ) {
-        return this.projectsService.createProject(email, dto);
+        return this.projectsService.createProject(id, dto);
     }
 
     @Get("all/")
@@ -36,6 +41,7 @@ export class ProjectsController {
         return this.projectsService.getProjects(email);
     }
 
+    @Roles(UserRole.USER, UserRole.ADMIN, UserRole.OWNER, UserRole.VIEWER)
     @Get("/:projectId")
     async getProject(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
@@ -43,6 +49,8 @@ export class ProjectsController {
         return this.projectsService.getProject(projectId);
     }
 
+    @Roles(UserRole.ADMIN, UserRole.OWNER)
+    @UseGuards(RBACGuard)
     @Delete("user/:projectId/:userId")
     async deleteUser(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
@@ -51,14 +59,16 @@ export class ProjectsController {
         return this.projectsService.deleteUser(projectId, userId);
     }
 
+    @Roles(UserRole.USER, UserRole.ADMIN)
     @Delete("leave/:projectId")
     async leaveProject(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
-        @GetCurrentEmail() email: string,
+        @GetCurrentId() id: Types.ObjectId,
     ) {
-        return this.projectsService.leaveProject(projectId, email);
+        return this.projectsService.leaveProject(projectId, id);
     }
 
+    @Roles(UserRole.OWNER)
     @Delete("project/:projectId")
     async deleteProject(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
@@ -66,6 +76,7 @@ export class ProjectsController {
         return this.projectsService.deleteProject(projectId);
     }
 
+    @Roles(UserRole.ADMIN, UserRole.OWNER)
     @Put("info/:projectId")
     async updateProjectInfo(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
@@ -74,6 +85,7 @@ export class ProjectsController {
         return this.projectsService.updateProjectInfo(projectId, dto);
     }
 
+    @Roles(UserRole.ADMIN, UserRole.OWNER)
     @Put("name/:projectId")
     async updateProjectName(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
@@ -82,6 +94,7 @@ export class ProjectsController {
         return this.projectsService.updateProjectName(projectId, dto);
     }
 
+    @Roles(UserRole.ADMIN, UserRole.OWNER)
     @Put("team/:projectId")
     async updateProjectTeam(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,

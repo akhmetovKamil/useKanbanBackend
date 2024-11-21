@@ -12,12 +12,17 @@ post {
 
 body:json {
   {
-    "email": "in12@gmail.com",
+    "email": "new212@gmail.com",
     "name": "Kfql",
     "surname": "Prostdad",
     "patronymic": "Prostdada",
     "password": "12345678"
   }
+}
+
+script:post-response {
+  bru.setEnvVar("at",res.body.jwt.access_token);
+  bru.setEnvVar("rt",res.body.jwt.refresh_token)
 }
 
 docs {

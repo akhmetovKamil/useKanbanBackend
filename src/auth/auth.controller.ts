@@ -14,6 +14,8 @@ import { GetCurrentRt } from "../common/decorators/get_current_rt.decorator";
 import { AuthService } from "./auth.service";
 import { SigninAuthDto } from "./dto/signin.auth.dto";
 import { SignupAuthDto } from "./dto/signup.auth.dto";
+import { GetCurrentId } from "../common/decorators/get_current_id.decorator";
+import { Types } from "mongoose";
 
 @Controller("auth")
 export class AuthController {
@@ -35,8 +37,8 @@ export class AuthController {
 
     @Post("logout")
     @HttpCode(HttpStatus.OK)
-    async logout(@GetCurrentEmail() email: string) {
-        await this.authService.logout(email);
+    async logout(@GetCurrentId() id: Types.ObjectId) {
+        await this.authService.logout(id);
     }
 
     @Public()
@@ -44,9 +46,10 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Post("refresh")
     async refresh(
+        @GetCurrentId() id: Types.ObjectId,
         @GetCurrentEmail() email: string,
         @GetCurrentRt() rt: string,
     ): Promise<JwtTokens> {
-        return await this.authService.refresh(email, rt);
+        return await this.authService.refresh(email, id, rt);
     }
 }

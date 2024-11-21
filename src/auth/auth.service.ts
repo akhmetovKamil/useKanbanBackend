@@ -13,7 +13,6 @@ import { createHash } from "crypto";
 import { Types } from "mongoose";
 import { SignupAuthDto } from "./dto/signup.auth.dto";
 import { SigninAuthDto } from "./dto/signin.auth.dto";
-import { UsersSchema } from "../users/users.schema";
 
 @Injectable()
 export class AuthService {
@@ -45,19 +44,22 @@ export class AuthService {
         return { jwt: await this.getTokens(dto.email, userId), user };
     }
 
-    async logout(email: string): Promise<void> {
-        await this.userService.updateRtHash(email, null);
+    async logout(id: Types.ObjectId): Promise<void> {
+        await this.userService.updateRtHash(id, null);
     }
 
-    async refresh(email: string, rt: string): Promise<JwtTokens> {
-        const user = await this.userService.getUser(email);
+    async refresh(
+        email: string,
+        id: Types.ObjectId,
+        rt: string,
+    ): Promise<JwtTokens> {
+        const user = await this.userService.getUserById(id);
         if (!user) throw new BadRequestException(Errors.USER_NOT_FOUND);
         if (!user.rtHash)
             throw new UnauthorizedException(Errors.RT_HASH_NOT_FOUND);
         const rtMatches = await this.compareTokens(rt, user.rtHash);
         if (!rtMatches) throw new UnauthorizedException(Errors.RT_HASH_INVALID);
-        const userId = await this.userService.getUserId(email);
-        return await this.getTokens(email, userId);
+        return await this.getTokens(email, id);
     }
 
     async simpleHash(data: string): Promise<string> {
@@ -79,7 +81,7 @@ export class AuthService {
     async getTokens(email: string, id: Types.ObjectId): Promise<JwtTokens> {
         const tokens = await this.generateTokens(email, id);
         const rtHash = await this.hashToken(tokens.refresh_token);
-        await this.userService.updateRtHash(email, rtHash);
+        await this.userService.updateRtHash(id, rtHash);
         return tokens;
     }
 
