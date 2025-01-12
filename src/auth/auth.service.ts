@@ -52,14 +52,14 @@ export class AuthService {
         email: string,
         id: Types.ObjectId,
         rt: string,
-    ): Promise<JwtTokens> {
+    ): Promise<SignType> {
         const user = await this.userService.getUserById(id);
         if (!user) throw new BadRequestException(Errors.USER_NOT_FOUND);
         if (!user.rtHash)
             throw new UnauthorizedException(Errors.RT_HASH_NOT_FOUND);
         const rtMatches = await this.compareTokens(rt, user.rtHash);
         if (!rtMatches) throw new UnauthorizedException(Errors.RT_HASH_INVALID);
-        return await this.getTokens(email, id);
+        return { jwt: await this.getTokens(email, id), user };
     }
 
     async simpleHash(data: string): Promise<string> {

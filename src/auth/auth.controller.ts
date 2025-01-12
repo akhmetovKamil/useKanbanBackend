@@ -49,7 +49,7 @@ export class AuthController {
         @GetCurrentId() id: Types.ObjectId,
         @GetCurrentEmail() email: string,
         @GetCurrentRt() rt: string,
-    ): Promise<JwtTokens> {
+    ): Promise<SignType> {
         return await this.authService.refresh(email, id, rt);
     }
 }
