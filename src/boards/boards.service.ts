@@ -10,7 +10,7 @@ import { Errors } from "../common/exception.constants";
 @Injectable()
 export class BoardsService {
     constructor(
-        @InjectModel(ProjectsSchema)
+        @InjectModel(BoardsSchema)
         private readonly boardsSchema: ReturnModelType<typeof BoardsSchema>,
         private readonly projectsService: ProjectsService,
     ) {}
