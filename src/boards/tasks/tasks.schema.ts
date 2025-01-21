@@ -7,10 +7,10 @@ export class TasksSchema extends TimeStamps {
     @prop({ required: true, type: () => String })
     name: string;
 
-    @prop({ required: true, Enum: ColumnEnum })
+    @prop({ required: true, Enum: ColumnEnum, default: ColumnEnum.BACKLOG })
     column: ColumnEnum;
 
-    @prop({ required: true, type: () => String })
-    description: string;
+    @prop({ type: () => String })
+    description?: string;
 
 }

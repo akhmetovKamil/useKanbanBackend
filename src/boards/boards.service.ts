@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "nestjs-typegoose";
-import { ProjectsSchema } from "../projects/projects.schema";
 import { ReturnModelType } from "@typegoose/typegoose";
 import { BoardsSchema } from "./boards.schema";
 import { ProjectsService } from "../projects/projects.service";
@@ -46,6 +45,8 @@ export class BoardsService {
     }
 
     async changeTaskStatus(){}
-    async addTask(){}
-    async deleteTask(){}
+
+    async addTask(boardId: Types.ObjectId, taskId: Types.ObjectId){}
+
+    async deleteTask(boardId: Types.ObjectId, taskId: Types.ObjectId){}
 }

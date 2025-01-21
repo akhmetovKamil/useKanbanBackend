@@ -7,6 +7,7 @@ export enum Errors {
     NOT_AUTHENTICATED = "access токен не валидный!",
     PROJECT_NOT_FOUND = "Проект не существует!",
     BOARD_NOT_FOUND = "Доска не существует!",
+    TASK_NOT_FOUND = "Задача не существует!",
     LINK_INCORRECT = "Неправильная ссылка!",
     NOT_AUTHORIZED = "Пользователь не авторизован!",
     CONNECTION_ERROR = "Ошибка подключения к серверу!",
