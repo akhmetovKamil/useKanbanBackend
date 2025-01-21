@@ -42,7 +42,7 @@ export class InvitationsService {
 
     async acceptLink(projectId: Types.ObjectId, dto: AcceptInvitationLinkDto) {
         const hashedToken = this.hashToken(dto.token);
-        const userId = await this.usersService.getUserId(dto.email);
+        const userId = await this.usersService.getUserId(dto.email); //TODO use id from jwt
         const project = await this.projectsService.getProject(projectId);
         const isValid = Array.from(project.invitationHashes.values()).includes(
             hashedToken,
@@ -64,7 +64,7 @@ export class InvitationsService {
             dto.role,
             dto.position,
         );
-        const userId = await this.usersService.getUserId(dto.email);
+        const userId = await this.usersService.getUserId(dto.email); //TODO use id from jwt
         await this.projectsService.changeUserData(projectId, {
             position: dto.position,
             userId,
@@ -85,7 +85,7 @@ export class InvitationsService {
         projectId: Types.ObjectId,
         dto: ManageInvitationEmailDto,
     ) {
-        const userId = await this.usersService.getUserId(dto.email);
+        const userId = await this.usersService.getUserId(dto.email); //TODO use id from jwt
         await this.projectsService.changeUserData(projectId, {
             position: dto.position,
             userId,

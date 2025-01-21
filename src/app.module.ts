@@ -10,6 +10,7 @@ import { APP_GUARD } from "@nestjs/core";
 import { AtGuard } from "./auth/guards/at.guard";
 import { ProjectsModule } from './projects/projects.module';
 import { MailModule } from './mail/mail.module';
+import { BoardsModule } from './boards/boards.module';
 
 @Module({
     imports: [
@@ -23,6 +24,7 @@ import { MailModule } from './mail/mail.module';
         AuthModule,
         ProjectsModule,
         MailModule,
+        BoardsModule,
     ],
     controllers: [AppController],
     providers: [
