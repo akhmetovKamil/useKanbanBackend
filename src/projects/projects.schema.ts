@@ -38,8 +38,8 @@ export class ProjectsSchema extends TimeStamps {
     @prop({ required: true, type: () => Team, _id: false })
     team: Map<Types.ObjectId, Team>;
 
-    @prop({ required: true, type: () => BoardsSchema, _id: false })
-    boards: Map<Types.ObjectId, BoardsSchema>;
+    @prop({ type: () => Types.ObjectId, ref: () => BoardsSchema })
+    boards: BoardsSchema[];
 
     @prop({ type: () => String }, PropType.MAP)
     invitationHashes: Map<string, string>;

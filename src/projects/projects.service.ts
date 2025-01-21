@@ -10,6 +10,7 @@ import { UserRole } from "../common/types/roles.types";
 import { UpdateProjectInfoDto } from "./dto/update.project_info.dto";
 import { UpdateProjectNameDto } from "./dto/update.project_name.dto";
 import { Errors } from "../common/exception.constants";
+import { UsersSchema } from "../users/users.schema";
 
 @Injectable()
 export class ProjectsService {
@@ -125,4 +126,24 @@ export class ProjectsService {
         console.log(userId, project);
         return project.team.get(userId).role;
     }
+
+    async pushBoard(projectId: Types.ObjectId,boardId: Types.ObjectId): Promise<void>{
+        await this.projectsSchema.updateOne(
+            { _id: projectId },
+            { $push: { "boards": boardId } }
+        );
+    }
+
+    async popBoard(projectId: Types.ObjectId,boardId: Types.ObjectId): Promise<void>{
+        await this.projectsSchema.updateOne(
+            { _id: projectId },
+            { $pull: { "boards": { $in: boardId } } }
+        );
+    }
+
+    async getBoardsPopulated(projectId: Types.ObjectId):Promise<ProjectsSchema>{
+        return this.projectsSchema.findOne({ _id: projectId }).populate("boards").exec();
+    }
+
+
 }
