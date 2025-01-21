@@ -19,7 +19,7 @@ export class TasksService {
 
     async createTask(boardId: Types.ObjectId, dto: CreateTaskDto): Promise<TasksSchema>{
         const task = new this.tasksSchema({...dto})
-        await this.boardsService.addTask(boardId, task._id)
+        await this.boardsService.pushTask(boardId, task._id, ColumnEnum.BACKLOG)
         return task.save()
     }
 
@@ -29,19 +29,22 @@ export class TasksService {
         return task;
     }
 
-    async getTasksByBoard(projectId: Types.ObjectId): Promise<TasksSchema[]>{
-        // const project = await this.projectsService.getBoardsPopulated(projectId);
-        // return project.boards as BoardsSchema[];
+    async getTasksByBoard(boardId: Types.ObjectId): Promise<TasksSchema[]>{
+        const board = await this.boardsService.getBoardPopulated(boardId)
+        const backlog = board.backlog as TasksSchema[]
+        const progress = board.progress as TasksSchema[]
+        const done = board.done as TasksSchema[]
+        return [...backlog,...progress,...done]
     }
 
-    async getTaskByColumn(projectId: Types.ObjectId): Promise<TasksSchema[]>{
-        // const project = await this.projectsService.getBoardsPopulated(projectId);
-        // return project.boards as BoardsSchema[];
+    async getTaskByColumn(boardId: Types.ObjectId, column: ColumnEnum): Promise<TasksSchema[]>{
+        const tasks = await this.boardsService.getBoardPopulatedColumn(boardId, column)
+        return tasks as TasksSchema[]
     }
 
     async deleteTask(boardId: Types.ObjectId, taskId: Types.ObjectId){
-        await this.tasksSchema.findByIdAndDelete(taskId)
-        await this.boardsService.deleteTask(boardId, taskId)
+        const task = await this.tasksSchema.findByIdAndDelete(taskId)
+        await this.boardsService.popTask(boardId, taskId, task.column)
     }
 
     async updateTaskInfo(taskId: Types.ObjectId, dto: CreateTaskDto){
@@ -51,12 +54,13 @@ export class TasksService {
         ).exec();
     }
 
-    async changeTaskStatus(taskId: Types.ObjectId, column: ColumnEnum){
+    async changeTaskStatus(boardId:Types.ObjectId, taskId: Types.ObjectId, newColumn: ColumnEnum){
+        const oldColumn = (await this.tasksSchema.findById(taskId)).column
         await this.tasksSchema.findByIdAndUpdate(taskId,
-            { $set: { column: column } },
+            { $set: { column: newColumn } },
             { new: true, useFindAndModify: false },
         ).exec();
-        // Call boards.changeTaskStatus()
+        await this.boardsService.changeTaskStatus(boardId, taskId, oldColumn, newColumn)
     }
 
 }

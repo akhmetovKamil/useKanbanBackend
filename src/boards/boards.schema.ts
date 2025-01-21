@@ -1,25 +1,20 @@
 import { TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
 import { prop } from "@typegoose/typegoose";
 import { Types } from "mongoose";
+import { TasksSchema } from "./tasks/tasks.schema";
 
-
-
-class Column {
-    @prop({ required: true, type: () => String, _id: false })
-    tasks: Map<Types.ObjectId, string>;
-}
 
 export class BoardsSchema extends TimeStamps {
     @prop({ required: true, type: () => String })
     name: string;
 
-    @prop({ required: true, type: () => Column, _id: false, default: Column})
-    backlog_column: Column;
+    @prop({ type: () => Types.ObjectId, ref: () => TasksSchema })
+    backlog: TasksSchema[];
 
-    @prop({ required: true, type: () => Column, _id: false, default: Column})
-    progress_column: Column;
+    @prop({ type: () => Types.ObjectId, ref: () => TasksSchema })
+    progress: TasksSchema[];
 
-    @prop({ required: true, type: () => Column, _id: false, default: Column})
-    done_column: Column;
+    @prop({ type: () => Types.ObjectId, ref: () => TasksSchema })
+    done: TasksSchema[];
 
 }
