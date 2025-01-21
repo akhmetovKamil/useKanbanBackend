@@ -28,7 +28,7 @@ export class BoardsController {
         return this.boardsService.getBoard(boardId);
     }
 
-    @Delete("project/:projectId/:boardId")
+    @Delete(":projectId/:boardId")
     async deleteBoard(
         @Param("projectId", ParseObjectIdPipe) projectId: Types.ObjectId,
         @Param("boardId", ParseObjectIdPipe) boardId: Types.ObjectId,
