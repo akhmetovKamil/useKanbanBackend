@@ -60,7 +60,7 @@ export class AuthService {
         const rtMatches = await this.compareTokens(rt, user.rtHash);
         if (!rtMatches) throw new UnauthorizedException(Errors.RT_HASH_INVALID);
         const jwt = await this.getTokens(email, id);
-        return {jwt, user}
+        return { jwt, user };
     }
 
     async simpleHash(data: string): Promise<string> {
